@@ -19,31 +19,38 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = palau();
+      var L = E.lectura, m = palau(), MO = BC.mosaico, cam = {}, ano = MO.texto('1929', 96, 7.5);
       return {
-        duracion: 13000 + L,
-        tarjeta: { en: 5000, hasta: 12300 + L, titulo: 'Font Màgica',
+        duracion: 13500 + L,
+        tarjeta: { en: 5600, hasta: 12800 + L, titulo: 'Font Màgica',
           texto: 'La diseñó el ingeniero Carles Buïgas para la Exposición Internacional de 1929, al pie del Palau Nacional, que hoy es el MNAC. La Guerra Civil la dejó muy dañada y volvió a funcionar a mediados de los cincuenta. Hoy sus chorros de agua y de luz bailan al ritmo de la música.',
           pie: 'Font Màgica de Montjuïc · Carles Buïgas · 1929' },
-        inicio: function () { var c = M.enMonumento(m, 0, 4, 3.0); E.encuadrar(c[0], c[1], 3.0, 2600); },
+        inicio: function () { var c = M.enMonumento(m, 0, 10, 3.0); E.encuadrar(c[0], c[1], 3.0, 2600); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13500 + L, 0.05); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 12300 + L, 13000 + L), s = E.cam.s, on = U.tramo(t, 2200, 3000) * a;
+          var a = 1 - U.tramo(t, 12800 + L, 13500 + L), s = E.cam.s, k = s / 3.0, on = U.tramo(t, 2200, 3000) * a;
+          FX.foco(ctx, M.enMonumento(m, 0, 10, s)[0], M.enMonumento(m, 0, 10, s)[1], 150 * s * 0.6, U.tramo(t, 1800, 3200) * a);
           if (on <= 0) return;
-          ctx.save(); ctx.lineCap = 'round';
+          // el agua se ilumina por debajo (una luz que cambia de color, sin destellos)
+          var base = E.aPantalla.apply(null, M.enMonumento(m, 0, -24, s)), col0 = COLORES[Math.floor(t / 1400) % COLORES.length];
+          MO.halo(ctx, base[0], base[1], 120 * k, col0, on * 0.8);
+          // los chorros: columnas de teselas de vidrio de color que suben y bajan a compás, como una ola por la fila
           for (var j = -6; j <= 6; j++) {
-            var x = j * 8.5, base = M.enMonumento(m, x * 0.92, -24, s), pb = E.aPantalla(base[0], base[1]);
-            // la altura de cada chorro: una ola que va y viene por la fila, a compás
-            var h = (22 + 46 * (0.5 + 0.5 * Math.sin(t / 420 - j * 0.55))) * (j % 2 ? 0.75 : 1), cima = M.enMonumento(m, x * 0.92, -24 + h, s), pc = E.aPantalla(cima[0], cima[1]);
-            var col = COLORES[(Math.floor(t / 1400) + Math.abs(j)) % COLORES.length];
-            var g = ctx.createLinearGradient(pb[0], pb[1], pc[0], pc[1]); g.addColorStop(0, U.rgba(col, 0.15)); g.addColorStop(1, U.rgba(col, 0.95));
-            ctx.globalAlpha = on; ctx.strokeStyle = g; ctx.lineWidth = Math.max(3, 2.4 * s);
-            ctx.beginPath(); ctx.moveTo(pb[0], pb[1]); ctx.quadraticCurveTo(pb[0] + j * 0.6, (pb[1] + pc[1]) / 2, pc[0], pc[1]); ctx.stroke();
-            for (var k = 0; k < 4; k++) {   // las gotas que caen de la cresta
-              var tk = ((t / 700 + k / 4 + j * 0.07) % 1), px = pc[0] + (k - 1.5) * s * 1.2 * tk * 2, py = pc[1] + tk * tk * (pb[1] - pc[1]) * 0.9;
-              ctx.globalAlpha = on * (1 - tk); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px, py, Math.max(1.5, 0.8 * s), 0, 6.2832); ctx.fill();
+            var x = j * 8.5 * 0.92, h = (22 + 46 * (0.5 + 0.5 * Math.sin(t / 420 - j * 0.55))) * (j % 2 ? 0.75 : 1);
+            var col = COLORES[((Math.floor(t / 1400) + Math.abs(j)) % COLORES.length + COLORES.length) % COLORES.length];
+            var fzm = Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1), tam = 7.5 * k, dy = tam * 0.9 / (s * fzm);   // las teselas, pegadas unas a otras
+            for (var y = 0; y < h; y += dy) {
+              var p = E.aPantalla.apply(null, M.enMonumento(m, x + Math.sin(y * 0.3 + t / 300) * 0.4, -24 + y, s)), cima = y + dy >= h;
+              MO.tesela(ctx, p[0], p[1], (cima ? 1.35 : 1) * tam * (1 - y / h * 0.3), y / h > 0.6 ? col : MO.VIDRIO[(j + 13 + Math.floor(y)) % MO.VIDRIO.length], 1, 900 + j * 31 + Math.floor(y), { alfa: on * (0.75 + 0.25 * y / h), sombra: false });
+            }
+            // las gotas que caen de la cresta, también de teselas
+            for (var g = 0; g < 3; g++) {
+              var tg = ((t / 700 + g / 3 + j * 0.07) % 1), pg = E.aPantalla.apply(null, M.enMonumento(m, x + (g - 1) * tg * 3, -24 + h * (1 - tg * tg * 0.9), s));
+              MO.tesela(ctx, pg[0], pg[1], 4.5 * k, col, 1, 950 + j * 7 + g, { alfa: on * (1 - tg), sombra: false });
             }
           }
-          ctx.restore();
+          var pt = E.aPantalla.apply(null, M.enMonumento(m, 0, 150, s)), en = 0.6 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, ano, pt[0], Math.max(ano.h * en / 2 + 24, pt[1]), U.tramo(t, 5600, 8000), { esc: en, salida: U.tramo(t, 11900 + L, 13300 + L) });
         }
       };
     }

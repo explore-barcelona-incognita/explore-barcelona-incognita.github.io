@@ -18,35 +18,36 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura;
-      function llama(ctx, x, y, e, t) {   // capas de gota que tiemblan, del rojo al oro
-        [['#c43b2b', 1], ['#e8663a', 0.78], ['#f2b33d', 0.55], ['#fbe6a8', 0.3]].forEach(function (c, k) {
-          var w = e * c[1] * (0.42 + 0.04 * Math.sin(t / 130 + k)), h = e * c[1] * (1.25 + 0.12 * Math.sin(t / 170 + k * 2)), sx = Math.sin(t / 210 + k) * e * 0.06;
-          ctx.fillStyle = c[0]; ctx.beginPath(); ctx.moveTo(x - w, y); ctx.quadraticCurveTo(x - w, y - h * 0.55, x + sx, y - h); ctx.quadraticCurveTo(x + w, y - h * 0.55, x + w, y); ctx.quadraticCurveTo(x, y + w * 0.5, x - w, y); ctx.fill();
-        });
-      }
+      var L = E.lectura, MO = BC.mosaico, cam = {}, ano = MO.texto('1714', 96, 7.5), FOC = ['#c43b2b', '#e8663a', '#f2b33d', '#fbe6a8', '#d8452f'];
+      var PORFID = ['#7a1f1c', '#8f2a24', '#6b1a18', '#9a3a2c'];
+      // la llama: teselas que suben desde el pebetero, se encogen y cambian del rojo al oro (siempre las mismas, en bucle)
+      var chispas = []; for (var i = 0; i < 70; i++) chispas.push({ x: (M.h(i, 1, 5) - 0.5), v: 0.6 + M.h(i, 2, 5) * 0.8, f: M.h(i, 3, 5) });
       return {
-        duracion: 14000 + L,
-        tarjeta: { en: 4800, hasta: 13300 + L, titulo: 'Onze de Setembre',
+        duracion: 14500 + L,
+        tarjeta: { en: 5600, hasta: 13800 + L, titulo: 'Onze de Setembre',
           texto: 'En el Fossar de les Moreres, junto a Santa Maria del Mar, se enterró a los defensores que murieron en el asedio de 1713–1714. Barcelona cayó el 11 de septiembre de 1714, y ese día es hoy la Diada Nacional de Catalunya. Aquí arde una llama que no se apaga, bajo un verso de Pitarra: <i>«Al fossar de les moreres no s’hi enterra cap traïdor».</i>',
           pie: 'Fossar de les Moreres · 11.09.1714' },
         inicio: function () { E.encuadrar(FOSSAR[0], FOSSAR[1], 3.6, 2600); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2700, 14500 + L, 0.05); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 13300 + L, 14000 + L), s = E.cam.s, p = E.aPantalla(FOSSAR[0], FOSSAR[1]), e = 9 * s;
+          var a = 1 - U.tramo(t, 13800 + L, 14500 + L), s = E.cam.s, k = s / 3.6, p = E.aPantalla(FOSSAR[0], FOSSAR[1]), e = 9 * s;
           FX.foco(ctx, FOSSAR[0], FOSSAR[1], 140 * s, U.tramo(t, 1600, 3000) * a);
-          var g = U.suave(U.tramo(t, 1800, 3600));
-          if (g <= 0) return;
-          ctx.save(); ctx.globalAlpha = a * g;
-          // el arco de pórfido rojo (el monumento de Viaplana y Fiol), en curva
-          ctx.strokeStyle = '#7a1f1c'; ctx.lineWidth = e * 0.6; ctx.lineCap = 'butt';
-          ctx.beginPath(); ctx.arc(p[0], p[1] + e * 5.5, e * 6, Math.PI * 1.18, Math.PI * 1.82); ctx.stroke();
-          ctx.strokeStyle = 'rgba(255,220,180,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(p[0], p[1] + e * 5.5, e * 5.72, Math.PI * 1.18, Math.PI * 1.82); ctx.stroke();
-          // el pebetero: un mástil de hierro con la llama arriba
-          ctx.strokeStyle = '#2f3a36'; ctx.lineWidth = Math.max(2, e * 0.14); ctx.beginPath(); ctx.moveTo(p[0] + e * 2.2, p[1] + e * 0.4); ctx.lineTo(p[0] + e * 2.2, p[1] - e * 2.6); ctx.stroke();
-          ctx.fillStyle = '#2f3a36'; ctx.beginPath(); ctx.ellipse(p[0] + e * 2.2, p[1] - e * 2.6, e * 0.4, e * 0.16, 0, 0, 6.2832); ctx.fill();
-          if (t > 3000) llama(ctx, p[0] + e * 2.2, p[1] - e * 2.66, e * Math.min(1, (t - 3000) / 900), t);
-          ctx.restore();
-          FX.etiqueta(ctx, '1714', FOSSAR[0], FOSSAR[1], { serif: true, tam: 34, dy: -e * 7.5, alfa: a * U.tramo(t, 3600, 4400), color: BC.color.acento });
+          // 1 · el arco de pórfido rojo del monumento, pieza a pieza
+          var arco = []; for (var q = 0; q <= 18; q++) { var an = Math.PI * (1.18 + 0.64 * q / 18); arco.push(E.aMundo(p[0] + Math.cos(an) * e * 6, p[1] + e * 5.5 + Math.sin(an) * e * 6)); }
+          MO.cadena(ctx, arco, U.tramo(t, 1800, 3800), { tam: 6.5 * k * 1.6, paleta: PORFID, alfa: a, semilla: 140 });
+          // 2 · el pebetero: un mástil de teselas de hierro
+          var pie = E.aMundo(p[0] + e * 2.2, p[1] + e * 0.5), boca = E.aMundo(p[0] + e * 2.2, p[1] - e * 2.6);
+          MO.cadena(ctx, [pie, boca], U.tramo(t, 3000, 3700), { tam: 4 * k * 1.6, paleta: ['#2f3a36', '#3a4642', '#46524c'], alfa: a, semilla: 150 });
+          // 3 · la llama que no se apaga: teselas que suben y se apagan arriba, del rojo al oro
+          var on = U.tramo(t, 3600, 4400) * a, bx = p[0] + e * 2.2, by = p[1] - e * 2.7;
+          MO.halo(ctx, bx, by - e * 1.6, 120 * k, '#ffb45a', on * 0.75);
+          if (on > 0) chispas.forEach(function (c, n) {
+            var u = (t / 1000 * c.v + c.f) % 1, alto = u * e * 5.2, ancho = (1 - u) * e * 0.9 * c.x * 2 + Math.sin(t / 160 + n) * e * 0.14 * u;
+            MO.tesela(ctx, bx + ancho, by - alto, e * 0.5 * (1 - u * 0.65), FOC[Math.min(FOC.length - 1, Math.floor(u * 4.2))], 1, 1500 + n, { alfa: on * (u < 0.15 ? u / 0.15 : 1 - (u - 0.15) / 0.85), sombra: false, ang: t / 400 + n });
+          });
+          // 4 · el año, en teselas de oro, encima del fossar
+          var en = 0.6 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, ano, p[0], Math.max(ano.h * en / 2 + 24, p[1] - e * 9), U.tramo(t, 4600, 7000), { esc: en, salida: U.tramo(t, 13000 + L, 14400 + L) });
         }
       };
     }

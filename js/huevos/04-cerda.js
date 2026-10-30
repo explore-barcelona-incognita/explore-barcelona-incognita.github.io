@@ -26,33 +26,47 @@
       });
     },
     escena: function (E, datos) {
-      var L = E.lectura, C = M.CERDA;
+      var L = E.lectura, C = M.CERDA, MO = BC.mosaico, cam = {}, ano = MO.texto('1859', 96, 7.5);
       if (!datos) { var q = M.aCerda.apply(null, M.ll(41.3925, 2.1650)); datos = { U: C.ou + Math.round((q[0] - C.ou) / C.paso) * C.paso, V: C.ov + Math.round((q[1] - C.ov) / C.paso) * C.paso }; datos.cruce = M.deCerda(datos.U, datos.V); }
-      var illes = [];
+      var illes = [], cerca = [];
       for (var i = -9; i <= 8; i++) for (var j = -9; j <= 8; j++) {
         var u0 = datos.U + i * C.paso, v0 = datos.V + j * C.paso, cm = M.deCerda(u0 + C.paso / 2, v0 + C.paso / 2);
         if (!M.enEixample(cm[0], cm[1])) continue;
-        illes.push({ p: octogono(u0, v0), d: Math.hypot(i + 0.5, j + 0.5) });
+        var d = Math.hypot(i + 0.5, j + 0.5);
+        illes.push({ p: octogono(u0, v0), d: d });
+        // en las manzanas más cercanas, los cuatro chaflanes se montan con teselas de oro
+        if (d < 2.4) [[0, 0, 1, 1], [1, 0, -1, 1], [1, 1, -1, -1], [0, 1, 1, -1]].forEach(function (e) {
+          var m0 = C.paso - 2 * C.calle, bu = u0 + C.calle + e[0] * m0, bv = v0 + C.calle + e[1] * m0;
+          cerca.push({ p: [M.deCerda(bu + e[2] * CH, bv), M.deCerda(bu, bv + e[3] * CH)], d: d });
+        });
       }
       return {
-        duracion: 12500 + L,
-        tarjeta: { en: 4600, hasta: 11800 + L, titulo: 'Pla Cerdà',
+        duracion: 13000 + L,
+        tarjeta: { en: 5200, hasta: 12300 + L, titulo: 'Pla Cerdà',
           texto: 'En 1859 se aprobó el plan del ingeniero Ildefons Cerdà para que Barcelona creciera fuera de sus murallas: una cuadrícula de manzanas de unos 113 metros con las esquinas cortadas a 45°, los chaflanes, para ganar luz, aire y visibilidad en cada cruce.',
           pie: 'Ildefons Cerdà · Pla de l’Eixample · 1859' },
-        inicio: function () { E.encuadrar(datos.cruce[0], datos.cruce[1], 0.55, 2400); },
+        inicio: function () { E.encuadrar(datos.cruce[0], datos.cruce[1], 0.7, 2400); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2600, 13000 + L, 0.08); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 11800 + L, 12500 + L), r = U.tramo(t, 1500, 7500) * 13;
+          var a = 1 - U.tramo(t, 12300 + L, 13000 + L), r = U.tramo(t, 1800, 8200) * 13, k = E.cam.s / 0.7;
+          // 1 · la onda: cada manzana se ilumina con un lavado de oro y un filete que se queda
           ctx.save(); ctx.lineJoin = 'round';
           illes.forEach(function (il) {
             var f = U.clamp(r - il.d, 0, 1); if (f <= 0) return;
-            var ola = 1 - U.clamp(r - il.d - 1, 0, 1);   // 1 cuando la onda pasa por la manzana, luego se queda en 0
-            ctx.beginPath(); il.p.forEach(function (q, k) { var p = E.aPantalla(q[0], q[1]); k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.closePath();
-            ctx.globalAlpha = a * f * (0.1 + 0.3 * ola); ctx.fillStyle = BC.color.acento; ctx.fill();
-            ctx.globalAlpha = a * f * 0.7; ctx.strokeStyle = 'rgba(20,17,15,0.8)'; ctx.lineWidth = 4.5 + 2 * ola; ctx.stroke();
-            ctx.globalAlpha = a * f; ctx.strokeStyle = BC.color.acento; ctx.lineWidth = 2.2 + 1.6 * ola; ctx.stroke();
+            var ola = 1 - U.clamp(r - il.d - 1, 0, 1);
+            ctx.beginPath(); il.p.forEach(function (q, n) { var p = E.aPantalla(q[0], q[1]); n ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }); ctx.closePath();
+            ctx.globalAlpha = a * f * (0.06 + 0.26 * ola); ctx.fillStyle = BC.color.acento; ctx.fill();
+            ctx.globalAlpha = a * f * 0.6; ctx.strokeStyle = 'rgba(20,17,15,0.75)'; ctx.lineWidth = 3.6; ctx.stroke();
+            ctx.globalAlpha = a * f * 0.9; ctx.strokeStyle = BC.color.acento; ctx.lineWidth = 1.6; ctx.stroke();
           });
           ctx.restore();
-          FX.punto(ctx, datos.cruce[0], datos.cruce[1], 4.5, BC.color.acento, a * U.tramo(t, 800, 1400));
+          // 2 · los chaflanes de alrededor del cruce, tesela a tesela (la idea de Cerdà, de cerca)
+          cerca.forEach(function (c, n) { MO.cadena(ctx, c.p, U.tramo(t, 1600 + c.d * 700, 2600 + c.d * 700), { tam: 7 * k, alfa: a, semilla: 60 + n }); });
+          var pc = E.aPantalla(datos.cruce[0], datos.cruce[1]);
+          MO.tesela(ctx, pc[0], pc[1], 12 * k, '#f2b33d', U.tramo(t, 1200, 1700), 9);
+          // 3 · el año del plan, en teselas, encima del cruce
+          var en = 0.62 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, ano, pc[0], Math.max(ano.h * en / 2 + 24, pc[1] - 150 * k), U.tramo(t, 5200, 7600), { esc: en, salida: U.tramo(t, 11400 + L, 12800 + L) });
         }
       };
     }

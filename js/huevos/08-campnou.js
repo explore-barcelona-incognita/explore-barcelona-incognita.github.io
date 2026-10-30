@@ -28,31 +28,36 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = estadio();
+      var L = E.lectura, m = estadio(), MO = BC.mosaico, cam = {}, lema = MO.texto('MÉS QUE UN CLUB', 96, 7.5), confeti = MO.confeti(80, MO.AZULGRANA, 23);
       return {
-        duracion: 12500 + L,
-        tarjeta: { en: 5000, hasta: 11800 + L, titulo: 'Camp Nou',
+        duracion: 13000 + L,
+        tarjeta: { en: 5600, hasta: 12300 + L, titulo: 'Camp Nou',
           texto: 'Se inauguró el 24 de septiembre de 1957, día de la Mercè, y es el estadio más grande de Europa: antes de las obras le cabían 99.354 personas. Reabrió en noviembre de 2025, aún en obras, y el plan es que supere las 105.000.',
           pie: 'Camp Nou · Les Corts · 1957' },
-        inicio: function () { var c = centro(2.2); E.encuadrar(c[0], c[1], 2.2, 2600); },
+        inicio: function () { var c = centro(2.4); E.encuadrar(c[0], c[1], 2.4, 2600); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 11800 + L, 12500 + L), s = E.cam.s, vuelta = (t - 2400) / 3000;
-          if (vuelta < 0 || vuelta > 2.15) return;
-          // la ola: en las gradas (elipses de 100 a 128 m del dibujo), un trozo de arco que se levanta al pasar
-          var cabeza = vuelta * Math.PI * 2;
-          for (var k = 0; k < 90; k++) {
-            var ang = k / 90 * Math.PI * 2, atras = ((cabeza - ang) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-            if (atras > 1.1 || (vuelta < 1 && ang > cabeza)) continue;
-            var alto = Math.sin(atras / 1.1 * Math.PI);   // se levanta y se vuelve a sentar
-            for (var fila = 0; fila < 4; fila++) {
-              var rr = 104 + fila * 6.5, q = M.enMonumento(m, Math.cos(ang) * rr * 1.06, 64 + Math.sin(ang) * rr * 0.585 + alto * 3, s), p = E.aPantalla(q[0], q[1]);
-              ctx.globalAlpha = a * alto; ctx.fillStyle = AZULGRANA[(k + fila) % AZULGRANA.length];
-              ctx.fillRect(p[0] - 2.2 * s, p[1] - (2 + alto * 4) * s, 4.4 * s, (2 + alto * 4) * s);
+          var a = 1 - U.tramo(t, 12300 + L, 13000 + L), s = E.cam.s, k = s / 2.4, cc = centro(s);
+          FX.foco(ctx, cc[0], cc[1], 160 * s, U.tramo(t, 1800, 3200) * a);
+          // la ola: en las gradas, las teselas de los aficionados se levantan al pasar y se vuelven a sentar (dos vueltas)
+          var vuelta = (t - 2400) / 3000;
+          if (vuelta > 0 && vuelta < 2.2) {
+            var cabeza = vuelta * Math.PI * 2;
+            for (var n = 0; n < 96; n++) {
+              var ang = n / 96 * Math.PI * 2, atras = ((cabeza - ang) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+              if (atras > 1.0 || (vuelta < 1 && ang > cabeza)) continue;
+              var alto = Math.sin(atras / 1.0 * Math.PI);
+              for (var fila = 0; fila < 3; fila++) {
+                var rr = 106 + fila * 7.5, q = M.enMonumento(m, Math.cos(ang) * rr * 1.06, 64 + Math.sin(ang) * rr * 0.585 + alto * 3.5, s), p = E.aPantalla(q[0], q[1]);
+                MO.tesela(ctx, p[0], p[1], 3.4 * k * (1 + alto * 0.5), MO.AZULGRANA[(n + fila) % 3], 1, 800 + n * 3 + fila, { alfa: a * alto, alto: 1 + alto * 2.5 });
+              }
             }
           }
-          ctx.globalAlpha = 1;
-          var et = M.enMonumento(m, 0, 64, s);
-          FX.etiqueta(ctx, 'Més que un club', et[0], et[1], { serif: true, tam: 26, alfa: a * U.tramo(t, 4200, 5000), color: '#edbb00' });
+          // el gol: confeti azulgrana desde el centro del campo, y el lema en teselas
+          var pc = E.aPantalla(cc[0], cc[1]);   // el centro del campo, en pantalla
+          if (t > 7400) MO.pintarConfeti(ctx, confeti, pc[0], pc[1], t - 7400, k * 1.2);
+          var en = 0.5 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, lema, pc[0], Math.max(lema.h * en / 2 + 24, pc[1] - 130 * s), U.tramo(t, 5600, 8400), { esc: en, salida: U.tramo(t, 11400 + L, 12800 + L) });
         }
       };
     }

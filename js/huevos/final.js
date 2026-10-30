@@ -16,6 +16,7 @@
       var L = E.lectura, huevos = datos.huevos.slice(), est = BC.interfaz.estado(), raiz = document.documentElement;
       huevos.sort(function (a, b) { return (est.hallados[a.id] || a.n * 1e12) - (est.hallados[b.id] || b.n * 1e12); });
       var pts = huevos.map(function (h) { return SITIOS[h.id] || [E.cam.x, E.cam.y]; }), tachado = false;
+      var cognita = BC.mosaico.texto('COGNITA', 120, 9);
       function duracion(ms) { var m = Math.round(ms / 60000); return m < 60 ? m + ' min' : m < 1440 ? Math.round(m / 60) + ' h' : Math.round(m / 1440) + ' dies'; }
       var tiempo = isFinite(datos.desde) && datos.hasta > datos.desde ? ' Has trigat ' + duracion(datos.hasta - datos.desde) + ' des del primer.' : '';
       return {
@@ -27,14 +28,21 @@
         cuadro: function (t) { if (!tachado && t > 8200) { tachado = true; raiz.classList.add('cognita'); } },
         fin: function () { if (!est.final) raiz.classList.toggle('cognita', false); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 14300 + L, 15000 + L), paso = 450, t0 = 2600;
+          var a = 1 - U.tramo(t, 14300 + L, 15000 + L), paso = 450, t0 = 2600, MO = BC.mosaico;
+          // el recorrido: un camino de teselas de oro que une los once lugares en el orden en que se encontraron
           var n = U.clamp((t - t0) / paso, 0, pts.length);
-          if (n > 1) FX.linea(ctx, pts.slice(0, Math.ceil(n)), 1, 1.6, BC.color.acento, 0.8 * a, [5, 6]);
+          if (n > 1) MO.cadena(ctx, pts.slice(0, Math.ceil(n)), U.clamp((n - 1) / (Math.ceil(n) - 1), 0, 1), { tam: 5, alfa: 0.9 * a, semilla: 31, dur: 0.08 });
+          // cada lugar: una tesela grande de oro que cae en su sitio, con su número encima
           pts.forEach(function (p, i) {
-            var f = U.tramo(t, t0 + i * paso, t0 + i * paso + 400); if (f <= 0) return;
-            FX.punto(ctx, p[0], p[1], 4 + 3 * (1 - f) + 2 * f, BC.color.acento, a * f);
-            FX.etiqueta(ctx, U.dos(huevos[i].n), p[0], p[1], { dy: -20, alfa: a * f, color: BC.color.acento });
+            var u = U.tramo(t, t0 + i * paso, t0 + i * paso + 500); if (u <= 0) return;
+            var q = E.aPantalla(p[0], p[1]);
+            MO.halo(ctx, q[0], q[1], 30, '#ffd98a', U.meseta(t, t0 + i * paso, t0 + i * paso + 300, t0 + i * paso + 600, t0 + i * paso + 1400) * a);
+            MO.tesela(ctx, q[0], q[1], 13, '#f2b33d', u, 1700 + i, { alfa: a });
+            FX.etiqueta(ctx, U.dos(huevos[i].n), p[0], p[1], { dy: -22, alfa: a * U.tramo(t, t0 + i * paso + 200, t0 + i * paso + 600), color: BC.color.acento });
           });
+          // y la palabra que cierra el juego, en teselas
+          var pc = cognita, en = 0.8 * Math.min(1, E.W / 1100);
+          MO.pintarTexto(ctx, pc, E.W / 2, Math.max(pc.h * en / 2 + 30, E.H * 0.2), U.tramo(t, 8000, 10600), { esc: en, salida: U.tramo(t, 13800 + L, 15000 + L) });
         }
       };
     }

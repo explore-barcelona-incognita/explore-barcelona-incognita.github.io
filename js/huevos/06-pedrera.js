@@ -23,32 +23,35 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = casa();
+      var L = E.lectura, m = casa(), MO = BC.mosaico, cam = {}, nombre = MO.texto('GUERRERS', 96, 7.5);
+      function P(lx, ly) { return E.aPantalla.apply(null, M.enMonumento(m, lx, ly, E.cam.s)); }
       return {
-        duracion: 12500 + L,
-        tarjeta: { en: 4800, hasta: 11800 + L, titulo: 'Los guerreros',
+        duracion: 13000 + L,
+        tarjeta: { en: 5400, hasta: 12300 + L, titulo: 'Los guerreros',
           texto: 'La Casa Milà, que todo el mundo llama La Pedrera, se construyó entre 1906 y 1912. En su azotea, las chimeneas y las salidas de escalera parecen soldados con casco montando guardia; por eso la llaman «el jardín de los guerreros». Desde 1984 es Patrimonio Mundial.',
           pie: 'Casa Milà · Antoni Gaudí · 1906–1912' },
-        inicio: function () { var c = M.enMonumento(m, 0, 60, 3.2); E.encuadrar(c[0], c[1], 3.2, 2600); },
+        inicio: function () { var c = M.enMonumento(m, 0, 66, 3.6); E.encuadrar(c[0], c[1], 3.6, 2600); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 11800 + L, 12500 + L), s = E.cam.s;
-          GUERREROS.forEach(function (x, k) {
-            var b = 70 + 4 * Math.sin(x / 9), alto = 12 + (k % 2) * 4;
-            var abre = U.suave(U.tramo(t, 2400 + k * 260, 3000 + k * 260));   // los ojos se abren uno tras otro
+          var a = 1 - U.tramo(t, 12300 + L, 13000 + L), s = E.cam.s, k = s / 3.6, c = M.enMonumento(m, 0, 66, s);
+          FX.foco(ctx, c[0], c[1], 150 * s * 0.6, U.tramo(t, 1800, 3200) * a);
+          GUERREROS.forEach(function (x, n) {
+            var b = 70 + 4 * Math.sin(x / 9), alto = 12 + (n % 2) * 4, abre = U.tramo(t, 2400 + n * 300, 3100 + n * 300);
             if (abre <= 0) return;
-            // hacia dónde miran: a un lado, al otro y, al final, de frente (a ti)
-            var mira = t < 5200 ? Math.sin((t - 2400) / 500 + k) : t < 7600 ? -0.8 * Math.sin((t - 5200) / 380) : 0;
-            var guinyo = (t > 8200 && t < 8450 && k === 2) ? 0.15 : 1;   // uno te guiña el ojo
+            // hacia dónde miran: a un lado, al otro y, al final, de frente (a ti); uno te guiña el ojo
+            var mira = t < 5400 ? Math.sin((t - 2400) / 520 + n) : t < 7800 ? -0.8 * Math.sin((t - 5400) / 400) : 0;
+            var guinyo = t > 8400 && t < 8700 && n === 2;
+            // el guerrero se vuelve: un brillo de esmalte en el casco cuando se despierta
+            var pc = P(x, b + alto + 3.6); MO.halo(ctx, pc[0], pc[1], 26 * k, '#fff3cf', a * U.meseta(t, 2400 + n * 300, 2800 + n * 300, 3400 + n * 300, 4400 + n * 300));
             [-1, 1].forEach(function (lado) {
-              var p = E.aPantalla.apply(null, M.enMonumento(m, x + lado * 1.15, b + alto * 0.62, s)), rx = 0.85 * s * 1.25, ry = rx * 0.75 * abre * guinyo;
-              ctx.globalAlpha = a; ctx.fillStyle = '#fbf8f0'; ctx.strokeStyle = 'rgba(20,17,15,0.85)'; ctx.lineWidth = Math.max(1, s * 0.3);
-              ctx.beginPath(); ctx.ellipse(p[0], p[1], rx, Math.max(0.5, ry), 0, 0, 6.2832); ctx.fill(); ctx.stroke();
-              if (ry > 1) { ctx.fillStyle = '#14110f'; ctx.beginPath(); ctx.arc(p[0] + mira * rx * 0.45, p[1] + ry * 0.1, Math.min(rx, ry) * 0.55, 0, 6.2832); ctx.fill(); }
+              var p = P(x + lado * 1.25, b + alto * 0.62), r = 4.6 * k;
+              if (guinyo && lado > 0) { MO.tesela(ctx, p[0], p[1] + r * 0.2, r * 0.9, '#2a2420', 1, 600 + n, { alfa: a, ang: 1.57, sombra: false }); return; }
+              MO.tesela(ctx, p[0], p[1], r, '#fbf8f0', abre, 500 + n * 2 + (lado > 0 ? 1 : 0), { alfa: a });   // el ojo: una tesela blanca
+              if (abre >= 1) MO.tesela(ctx, p[0] + mira * r * 0.42, p[1] + r * 0.08, r * 0.52, '#14110f', 1, 520 + n, { alfa: a, sombra: false });   // la pupila
             });
           });
-          ctx.globalAlpha = 1;
-          var et = M.enMonumento(m, 0, 96, s);
-          FX.etiqueta(ctx, 'El jardín de los guerreros', et[0], et[1], { serif: true, tam: 24, dy: -10, alfa: a * U.tramo(t, 5200, 6000), color: BC.color.acento });
+          var pt = P(0, 104), en = 0.6 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, nombre, pt[0], Math.max(nombre.h * en / 2 + 24, pt[1]), U.tramo(t, 5600, 8200), { esc: en, salida: U.tramo(t, 11400 + L, 12800 + L) });
         }
       };
     }

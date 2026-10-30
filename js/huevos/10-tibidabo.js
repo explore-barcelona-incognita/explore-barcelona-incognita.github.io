@@ -7,18 +7,20 @@
   var BC = window.BC, U = BC.util, M = BC.mapa, FX = BC.fx;
   var NX = 88, NY = 36, NR = 26, CABINAS = ['#f2b33d', '#2f5fae', '#4f9a3c', '#c43b2b'];   // la noria del dibujo del monumento
   function monte() { return M.monumento('tibidabo'); }
-  function noria(ctx, E, giro, alfa) {   // la noria, por encima del dibujo, girada «giro» radianes
-    var m = monte(), s = E.cam.s, c = E.aPantalla.apply(null, M.enMonumento(m, NX, NY, s)), f = Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1), r = NR * f * s;
-    ctx.save(); ctx.globalAlpha = alfa;
-    ctx.strokeStyle = '#c43b2b'; ctx.lineWidth = Math.max(1.5, 0.9 * f * s); ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, 6.2832); ctx.stroke();
-    ctx.lineWidth = Math.max(1, 0.4 * f * s); ctx.strokeStyle = '#d8452f';
-    for (var k = 0; k < 8; k++) { var an = giro + k / 8 * 6.2832; ctx.beginPath(); ctx.moveTo(c[0], c[1]); ctx.lineTo(c[0] + Math.cos(an) * r, c[1] + Math.sin(an) * r); ctx.stroke(); }
-    for (k = 0; k < 8; k++) {
-      var a2 = giro + k / 8 * 6.2832, x = c[0] + Math.cos(a2) * r, y = c[1] + Math.sin(a2) * r, e = Math.max(3, 3.2 * f * s);
-      ctx.fillStyle = 'rgba(20,17,15,0.7)'; ctx.fillRect(x - e / 2 - 1, y - 1, e + 2, e * 1.1 + 2);   // las cabinas cuelgan siempre hacia abajo
-      ctx.fillStyle = CABINAS[k % 4]; ctx.fillRect(x - e / 2, y, e, e * 1.1);
+  function noria(ctx, E, giro, alfa) {   // la noria, de teselas, por encima del dibujo, girada «giro» radianes
+    var m = monte(), s = E.cam.s, MO = BC.mosaico, c = E.aPantalla.apply(null, M.enMonumento(m, NX, NY, s)), f = Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1), r = NR * f * s, t0 = Math.max(3, 1.2 * f * s);
+    if (alfa <= 0) return;
+    for (var k = 0; k < 8; k++) {   // los radios
+      var an = giro + k / 8 * 6.2832;
+      for (var d = 0.18; d < 0.95; d += 0.16) MO.tesela(ctx, c[0] + Math.cos(an) * r * d, c[1] + Math.sin(an) * r * d, t0 * 0.7, '#d8452f', 1, 1000 + k * 9 + Math.round(d * 10), { alfa: alfa, sombra: false, ang: an });
     }
-    ctx.restore();
+    var n = Math.max(24, Math.round(r * 6.2832 / (t0 * 1.15)));
+    for (k = 0; k < n; k++) { var a2 = giro + k / n * 6.2832; MO.tesela(ctx, c[0] + Math.cos(a2) * r, c[1] + Math.sin(a2) * r, t0, k % 2 ? '#c43b2b' : '#a8282a', 1, 1100 + k, { alfa: alfa, ang: a2 }); }   // el aro
+    MO.tesela(ctx, c[0], c[1], t0 * 1.6, '#f2b33d', 1, 1200, { alfa: alfa });
+    for (k = 0; k < 8; k++) {   // las cabinas: cuelgan siempre hacia abajo
+      var a3 = giro + k / 8 * 6.2832, x = c[0] + Math.cos(a3) * r, y = c[1] + Math.sin(a3) * r + t0 * 1.3;
+      MO.tesela(ctx, x, y, t0 * 1.7, CABINAS[k % 4], 1, 1300 + k, { alfa: alfa });
+    }
   }
   BC.registrar({
     id: 'tibidabo', n: 10, nombre: 'La noria del Tibidabo', tipo: 'Espera',
@@ -39,18 +41,23 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = monte();
+      var L = E.lectura, m = monte(), MO = BC.mosaico, cam = {}, lema = MO.texto('TIBI DABO', 96, 7.5);
       return {
-        duracion: 13000 + L,
-        tarjeta: { en: 5000, hasta: 12300 + L, titulo: 'Tibidabo',
+        duracion: 13500 + L,
+        tarjeta: { en: 5600, hasta: 12800 + L, titulo: 'Tibidabo',
           texto: 'Su nombre viene del latín <i>tibi dabo</i>, «te daré»: las palabras con que, según el Evangelio, el diablo ofreció a Jesús los reinos del mundo desde lo alto de un monte. Arriba, a 512 metros, está el parque de atracciones en funcionamiento más antiguo de España, abierto en 1901.',
           pie: 'Tibidabo · Serra de Collserola · 512 m' },
-        inicio: function () { var c = M.enMonumento(m, 40, 60, 2.4); E.encuadrar(c[0], c[1], 2.4, 2600); },
+        inicio: function () { var c = M.enMonumento(m, 44, 64, 2.6); E.encuadrar(c[0], c[1], 2.6, 2600); },
+        cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13500 + L, 0.05); },
         frente: function (ctx, t) {
-          var a = 1 - U.tramo(t, 12300 + L, 13000 + L), vel = U.tramo(t, 1800, 4500);
+          var a = 1 - U.tramo(t, 12800 + L, 13500 + L), s = E.cam.s, k = s / 2.6, vel = U.tramo(t, 1800, 4500), c = M.enMonumento(m, 44, 64, s);
+          FX.foco(ctx, c[0], c[1], 160 * s * 0.6, U.tramo(t, 1800, 3200) * a);
+          // el Cristo de lo alto se ilumina, y la noria arranca y gira
+          var cr = E.aPantalla.apply(null, M.enMonumento(m, 0, 158, s));
+          MO.halo(ctx, cr[0], cr[1], 60 * k, '#fff3cf', U.suave(U.tramo(t, 2600, 3800)) * a);
           noria(ctx, E, vel * vel * t / 900, a);
-          var et = M.enMonumento(m, 0, 170, E.cam.s);
-          FX.etiqueta(ctx, 'Tibi dabo · «te daré»', et[0], et[1], { serif: true, tam: 24, dy: -8, alfa: a * U.tramo(t, 4200, 5000), color: BC.color.acento });
+          var pt = E.aPantalla.apply(null, M.enMonumento(m, 20, 186, s)), en = 0.6 * Math.max(0.8, Math.min(1.2, k));
+          MO.pintarTexto(ctx, lema, Math.min(E.W - lema.w * en / 2 - 20, pt[0]), Math.max(lema.h * en / 2 + 24, pt[1]), U.tramo(t, 5600, 8200), { esc: en, salida: U.tramo(t, 11900 + L, 13300 + L) });
         }
       };
     }
