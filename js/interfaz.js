@@ -1,0 +1,258 @@
+/* Barcelona Incognita · interfaz
+   El registro de secretos, el progreso (en este navegador), el cuaderno, la tarjeta de cada escena, los avisos,
+   los instrumentos (ALTURA, BARRI y BATEC, que late cerca de un secreto de lugar), la entrada y los créditos.
+   Para volver o cerrar: la tecla ⌫ (nunca Esc, que en pantalla completa saca de ella). */
+(function () {
+  'use strict';
+  var BC = window.BC, U = BC.util, E = BC.motor;
+  var CLAVE = 'barcelona-incognita.v1';   // no se cambia nunca: borraría el progreso de quien ya juega
+  var PRUEBA = /[?&]prueba\b/.test(location.search);
+  var I = BC.interfaz = { prueba: PRUEBA };
+  var huevos = [], final = null;
+  var estado = { hallados: {}, final: false, introVista: false };
+  var $ = function (id) { return document.getElementById(id); };
+  var raiz = document.documentElement;
+  var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: 'https://www.linkedin.com/in/pau-morat%C3%B3-sebasti%C3%A0-5554a01b2' };
+
+  /* ---------- registro ----------
+     Cada secreto: { id, n, nombre, tipo, pista, lugar?: () => [X, Y] en el plano girado, zmin?, detectar(api), escena(motor, datos) } */
+  BC.registrar = function (h) { huevos.push(h); huevos.sort(function (a, b) { return a.n - b.n; }); };
+  BC.registrarFinal = function (h) { final = h; };
+  I.huevos = function () { return huevos; };
+  I.estado = function () { return estado; };
+
+  function cargar() { try { var s = localStorage.getItem(CLAVE); if (s) { var o = JSON.parse(s); for (var k in o) estado[k] = o[k]; } } catch (e) { /* sin almacenamiento */ } }
+  function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) { /* sin almacenamiento */ } }
+  function cuantos() { return huevos.filter(function (h) { return estado.hallados[h.id]; }).length; }
+
+  /* ---------- disparar un secreto ---------- */
+  I.disparar = function (h, datos, op) {
+    op = op || {};
+    if (E.escena || !$('intro').hidden || !$('creditos').hidden) return false;
+    cerrarCuaderno();
+    var nuevo = !estado.hallados[h.id] && !op.prueba;
+    if (nuevo) { estado.hallados[h.id] = Date.now(); guardar(); }
+    h.ultimosDatos = datos || h.ultimosDatos || null;
+    var envoltorio = { id: h.id, escena: function (motor) {
+      var s = h.escena(motor, datos || h.ultimosDatos || null);
+      if (s && s.tarjeta && !s.tarjeta.etiqueta) s.tarjeta.etiqueta = 'Secreto ' + U.dos(h.n) + ' / ' + U.dos(huevos.length) + ' · ' + h.tipo;
+      return s;
+    } };
+    E.reproducir(envoltorio, function () {
+      pintarLista(nuevo ? h.id : null);
+      if (nuevo) {
+        aviso('Secreto encontrado <b>' + U.dos(cuantos()) + '/' + U.dos(huevos.length) + '</b> · ' + h.nombre);
+        var b = $('b-cuaderno'); b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso');
+        if (cuantos() === huevos.length && !estado.final && final) setTimeout(function () { I.verFinal(); }, 1600);
+      }
+    });
+    return true;
+  };
+  I.verFinal = function () {
+    if (!final || E.escena) return;
+    cerrarCuaderno();
+    var primero = Infinity, ultimo = 0;
+    huevos.forEach(function (h) { var t = estado.hallados[h.id]; if (t) { primero = Math.min(primero, t); ultimo = Math.max(ultimo, t); } });
+    E.reproducir({ id: 'final', escena: function (motor) { return final.escena(motor, { desde: primero, hasta: ultimo, huevos: huevos }); } }, function () {
+      if (cuantos() === huevos.length) { estado.final = true; guardar(); }
+      pintarLista();
+      mostrarCreditos();
+    });
+  };
+
+  /* ---------- créditos ---------- */
+  function mostrarCreditos() {
+    var c = $('creditos');
+    c.hidden = false; c.classList.remove('saliendo'); void c.offsetWidth; c.classList.add('visible');
+    E.bloqueado = true;
+    setTimeout(function () { var b = $('creditos-enlace'); try { b.focus({ preventScroll: true }); } catch (e) { b.focus(); } }, 2600);
+  }
+  function cerrarCreditos() {
+    var c = $('creditos'); if (c.hidden) return;
+    c.classList.remove('visible'); c.classList.add('saliendo');
+    E.bloqueado = false; E.ultimoInput = E.t;
+    setTimeout(function () { c.hidden = true; c.classList.remove('saliendo'); }, 650);
+  }
+  I.mostrarCreditos = mostrarCreditos;
+
+  /* ---------- tarjeta ---------- */
+  I.tarjeta = function (t) {
+    var el = $('tarjeta');
+    if (!t) { el.classList.remove('visible'); return; }
+    var v = function (x) { return typeof x === 'function' ? x() : (x || ''); };
+    $('t-etq').textContent = v(t.etiqueta);
+    $('t-tit').textContent = v(t.titulo);
+    $('t-txt').innerHTML = v(t.texto);
+    $('t-pie').textContent = v(t.pie);
+    void el.offsetWidth; el.classList.add('visible');
+  };
+
+  /* ---------- aviso ---------- */
+  var tAviso = null;
+  function aviso(html, ms) {
+    var el = $('aviso'); el.innerHTML = html; el.classList.add('visible');
+    clearTimeout(tAviso); tAviso = setTimeout(function () { el.classList.remove('visible'); }, ms || 4200);
+  }
+  I.aviso = aviso;
+
+  /* ---------- cuaderno ---------- */
+  function abrirCuaderno() {
+    $('cuaderno').classList.add('abierto'); $('cuaderno').setAttribute('aria-hidden', 'false');
+    $('b-cuaderno').setAttribute('aria-expanded', 'true'); raiz.classList.add('cuaderno-abierto');
+  }
+  function cerrarCuaderno() {
+    $('cuaderno').classList.remove('abierto'); $('cuaderno').setAttribute('aria-hidden', 'true');
+    $('b-cuaderno').setAttribute('aria-expanded', 'false'); raiz.classList.remove('cuaderno-abierto');
+  }
+  I.abrirCuaderno = abrirCuaderno; I.cerrarCuaderno = cerrarCuaderno;
+
+  function fecha(ms) {
+    var d = new Date(ms);
+    return U.dos(d.getDate()) + '.' + U.dos(d.getMonth() + 1) + '.' + d.getFullYear() + ' · ' + U.dos(d.getHours()) + ':' + U.dos(d.getMinutes());
+  }
+  function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+
+  function pintarLista(recien) {
+    var ol = $('lista'); ol.innerHTML = '';
+    huevos.forEach(function (h) {
+      var ok = !!estado.hallados[h.id];
+      var li = el('li', 'entrada' + (ok ? ' hallada' : '') + (recien === h.id ? ' nueva' : ''));
+      li.appendChild(el('div', 'e-num', U.dos(h.n)));
+      var c = el('div', 'e-cuerpo');
+      c.appendChild(el('div', 'e-tipo', h.tipo));
+      var nom = el('div', 'e-nombre');
+      if (ok) nom.textContent = h.nombre;
+      else { var cen = el('span', 'e-censura'); cen.style.width = (h.nombre.length * 0.48 + 0.6) + 'em'; nom.appendChild(cen); nom.setAttribute('aria-label', 'Sin descubrir'); }
+      c.appendChild(nom);
+      c.appendChild(el('p', 'e-pista', h.pista));
+      if (ok || PRUEBA) {
+        var meta = el('div', 'e-meta');
+        if (ok) meta.appendChild(el('span', '', 'Encontrado ' + fecha(estado.hallados[h.id])));
+        var b = el('button', 'e-ver', ok ? '↻ Ver otra vez' : '▶ Probar');
+        b.type = 'button';
+        b.addEventListener('click', function () { I.disparar(h, null, { prueba: !ok }); });
+        meta.appendChild(b); c.appendChild(meta);
+      }
+      li.appendChild(c); ol.appendChild(li);
+    });
+    var n = cuantos();
+    $('contador').textContent = U.dos(n) + '/' + U.dos(huevos.length);
+    var seg = $('segmentos'); seg.innerHTML = ''; seg.style.gridTemplateColumns = 'repeat(' + Math.max(1, huevos.length) + ', 1fr)';
+    for (var i = 0; i < huevos.length; i++) seg.appendChild(el('i', i < n ? 'si' : ''));
+    $('ver-final').hidden = !(estado.final || (PRUEBA && final));
+    $('c-credito-linea').hidden = !estado.final;
+    raiz.classList.toggle('cognita', !!estado.final);
+  }
+
+  /* ---------- instrumentos ---------- */
+  var cuadroHud = 0, ultimos = {}, barrioActual = '';
+  function barras(id, valor) {
+    var b = Math.ceil(valor * 5 - 0.15); if (ultimos[id] === b) return; ultimos[id] = b;
+    var is = $(id).children; for (var i = 0; i < is.length; i++) is[i].classList.toggle('si', i < b);
+  }
+  function instrumentos() {
+    // BATEC: el pulso sube cuando te acercas a un secreto de lugar que aún no has encontrado
+    // (con ratón cuenta el puntero; en pantalla táctil, el centro de la vista)
+    var objetivo = 0, p = E.puntero, ref = p.sobre && p.tipo === 'mouse' ? [p.x, p.y] : [E.W / 2, E.H / 2];
+    huevos.forEach(function (h) {
+      if (!h.lugar || estado.hallados[h.id]) return;
+      var q = h.lugar(); if (!q) return;
+      var sp = E.aPantalla(q[0], q[1]), cerca = U.clamp(1 - Math.hypot(sp[0] - ref[0], sp[1] - ref[1]) / (h.radio || 260), 0, 1);
+      objetivo = Math.max(objetivo, cerca * (E.cam.s >= (h.zmin || 0) ? 1 : 0.4));
+    });
+    E.senal += (objetivo - E.senal) * 0.12;
+    if (++cuadroHud % 5) return;
+    $('h-altura').textContent = U.num(E.W / E.cam.s * 0.87) + ' m';
+    barras('h-batec', E.senal);
+    $('h-batec').classList.toggle('latiendo', E.senal > 0.12);
+    $('h-batec').style.animationDuration = (1.3 - E.senal * 0.75).toFixed(2) + 's';
+    if (cuadroHud % 15 === 0) {
+      var b = BC.mapa.barrio(E.cam.x, E.cam.y);
+      if (b !== barrioActual) { barrioActual = b; var hb = $('h-barri'); hb.classList.remove('cambia'); void hb.offsetWidth; hb.textContent = b; hb.classList.add('cambia'); }
+    }
+  }
+
+  /* ---------- teclas pulsadas (para los secretos de teclado) ---------- */
+  var SIMBOLOS = { ArrowLeft: '←', ArrowRight: '→', ArrowUp: '↑', ArrowDown: '↓', Backspace: '⌫' };
+  function tecla(d) {
+    if (E.escena && d.key !== 'Backspace') return;
+    var s = SIMBOLOS[d.key] || (d.key.length === 1 && /\S/.test(d.key) ? d.key.toUpperCase() : null);
+    if (!s || /^[+\-=_]$/.test(d.key)) return;
+    var cont = $('teclas'), k = el('kbd', '', s);
+    cont.appendChild(k);
+    while (cont.children.length > 10) cont.removeChild(cont.firstChild);
+    setTimeout(function () { if (k.parentNode) k.parentNode.removeChild(k); }, 2300);
+  }
+
+  /* ---------- la medalla de la entrada: un plato de trencadís pintado con las mismas piezas que el mapa ---------- */
+  function medalla() {
+    var cvm = $('intro-medalla'); if (!cvm) return;
+    var M = BC.mapa, d = Math.min(window.devicePixelRatio || 1, 2), lado = 190, x = cvm.getContext('2d');
+    cvm.width = cvm.height = lado * d; x.setTransform(d, 0, 0, d, 0, 0);
+    var c = lado / 2, cols = [['#f2b33d', '#f4d27a', '#e9b64a'], ['#c43b2b', '#e8663a', '#d8452f'], ['#2f5fae', '#3b7dc4', '#4a8ed0'], ['#4f9a3c', '#6aa84a'], ['#f4efe3', '#e9e2cf']];
+    x.fillStyle = BC.color.junta; x.beginPath(); x.arc(c, c, c - 2, 0, 6.2832); x.fill();
+    var anillos = [[0, 16, 1, 0], [16, 38, 8, 1], [38, 62, 14, 2], [62, 82, 22, 3], [82, 93, 30, 4]];
+    anillos.forEach(function (a, k) {
+      for (var i = 0; i < a[2]; i++) {
+        var a0 = i / a[2] * 6.2832 + k * 0.3, a1 = (i + 1) / a[2] * 6.2832 + k * 0.3, q = [], n = Math.max(2, Math.round(6 / a[2] * 3));
+        if (a[0] === 0) { for (var j = 0; j < 14; j++) q.push([c + Math.cos(j / 14 * 6.2832) * a[1], c + Math.sin(j / 14 * 6.2832) * a[1]]); }
+        else { for (j = 0; j <= n; j++) { var an = a0 + (a1 - a0) * j / n; q.push([c + Math.cos(an) * a[1], c + Math.sin(an) * a[1]]); } for (j = n; j >= 0; j--) { an = a0 + (a1 - a0) * j / n; q.push([c + Math.cos(an) * a[0], c + Math.sin(an) * a[0]]); } }
+        var pal = k === 0 ? cols[0] : k === 4 ? cols[(i % 3 === 0) ? 2 : 4] : cols[(i + k) % 4], col = pal[i % pal.length];
+        M.pieza(x, q, M.tono(col, 0.94 + M.h(i, k, 3) * 0.12), 1.3, 1);
+      }
+    });
+    cvm.classList.add('listo');
+  }
+
+  /* ---------- arranque ---------- */
+  I.iniciar = function () {
+    cargar();
+    var tactil = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    $('ayuda').textContent = tactil ? 'Desliza para moverte · Pellizca para acercarte' : 'Arrastra para moverte · Rueda para acercarte';
+    $('c-intro').textContent = 'Los secretos escondidos en la ciudad. Cada pista apunta a uno; el nombre aparece cuando lo encuentras.';
+
+    huevos.forEach(function (h) {
+      h.detectar && h.detectar({
+        motor: E, en: E.en,
+        capa: function (fn) { E.capas.push(fn); },
+        hallado: function () { return !!estado.hallados[h.id]; },
+        disparar: function (datos) { return I.disparar(h, datos); }
+      });
+    });
+    E.en('cuadro', instrumentos);
+    E.en('tecla', tecla);
+    // ⌫ para volver: salta la escena o cierra el cuaderno o los créditos
+    E.en('tecla', function (d) {
+      if (d.key !== 'Backspace') return;
+      if (E.escena) E.saltar(); else { cerrarCuaderno(); cerrarCreditos(); }
+    });
+
+    $('b-cuaderno').addEventListener('click', function () { $('cuaderno').classList.contains('abierto') ? cerrarCuaderno() : abrirCuaderno(); });
+    $('cerrar-cuaderno').addEventListener('click', cerrarCuaderno);
+    $('saltar').addEventListener('click', function () { E.saltar(); });
+    $('ver-final').addEventListener('click', function () { I.verFinal(); });
+    $('borrar').addEventListener('click', function () {
+      if (!window.confirm('¿Borrar todos los secretos encontrados en este navegador?')) return;
+      estado = { hallados: {}, final: false, introVista: true }; guardar(); pintarLista();
+    });
+
+    $('creditos-nombre').textContent = AUTOR.nombre;
+    $('c-credito-nombre').textContent = AUTOR.nombre;
+    $('creditos-enlace').href = AUTOR.linkedin; $('c-credito').href = AUTOR.linkedin;
+    $('creditos-cerrar').addEventListener('click', cerrarCreditos);
+
+    pintarLista();
+
+    var intro = $('intro');
+    if (!estado.introVista && !PRUEBA) {
+      intro.hidden = false; E.bloqueado = true;
+      medalla();
+      $('empezar').addEventListener('click', function () {
+        estado.introVista = true; guardar();
+        intro.classList.add('saliendo'); E.bloqueado = false; E.ultimoInput = E.t;
+        setTimeout(function () { intro.hidden = true; }, 900);
+      });
+      setTimeout(function () { try { $('empezar').focus({ preventScroll: true }); } catch (e) { /* nada */ } }, 50);
+    }
+  };
+})();
