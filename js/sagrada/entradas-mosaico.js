@@ -162,7 +162,8 @@
      sigue alejándose hasta la ciudad. Sin efectos. */
   function salirTesela() {
     var m = M.monumento('sagrada'), OR = teselaOro(m), A = null, R = null, B = null, CARA = null, listo = false;
-    var TT = 5600, S1 = 1.1, SR = 24, SF, JW = 0.105, HL = 0.133, sem = M.monumentos.indexOf(m) * 977;
+    // S1 por debajo de 0,95: si no, al acabar dispararía el secreto 03 (mirar la Sagrada)
+    var TT = 5600, S1 = 0.7, SR = 24, SF, JW = 0.105, HL = 0.133, sem = M.monumentos.indexOf(m) * 977;
     function sDe(t) { var u = U.tramo(t, 0, TT), e = 0.5 - 0.5 * Math.cos(Math.PI * u); return Math.exp(Math.log(SF) + (Math.log(S1) - Math.log(SF)) * e); }
     return {
       duracion: TT + 200,
