@@ -158,7 +158,7 @@
     sortir: function () {
       if (E.escena || E.mundo !== 'sagrada') return false;
       BC.interfaz.cerrarCuaderno();
-      return E.reproducir({ id: 'sortida', escena: escenaSortir });
+      return E.reproducir({ id: 'sortida', escena: BC.entradas.salir || escenaSortir });   // la salida: el zoom de la entrada, al revés (js/sagrada/entradas-mosaico.js)
     }
   };
 

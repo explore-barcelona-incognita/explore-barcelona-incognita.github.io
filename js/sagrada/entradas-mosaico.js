@@ -157,6 +157,56 @@
     };
   }
 
+  /* ---------- la salida: lo mismo al revés (Pau 31/10) ----------
+     Lo que se ve del templo se encoge hasta ser otra vez la tesela de lo alto de la torre de Jesús, y el mismo zoom suave
+     sigue alejándose hasta la ciudad. Sin efectos. */
+  function salirTesela() {
+    var m = M.monumento('sagrada'), OR = teselaOro(m), A = null, R = null, B = null, CARA = null, listo = false;
+    var TT = 5600, S1 = 1.1, SR = 24, SF, JW = 0.105, HL = 0.133, sem = M.monumentos.indexOf(m) * 977;
+    function sDe(t) { var u = U.tramo(t, 0, TT), e = 0.5 - 0.5 * Math.cos(Math.PI * u); return Math.exp(Math.log(SF) + (Math.log(S1) - Math.log(SF)) * e); }
+    return {
+      duracion: TT + 200,
+      cuadro: function (t) {
+        if (!listo) {
+          listo = true; B = X.copia();   // la vista del templo tal como está ahora
+          var cq = [0, 0]; OR.q.forEach(function (v) { cq[0] += v[0] / 4; cq[1] += v[1] / 4; });
+          CARA = OR.q.map(function (v) { var dx = v[0] - cq[0], dy = v[1] - cq[1], dd = Math.hypot(dx, dy) || 1, f = Math.max(0.2, 1 - JW * 0.9 / dd); return [cq[0] + dx * f, cq[1] + dy * f]; });
+          function dentroCara(x, y) { var r = false; for (var i2 = 0, j2 = 3; i2 < 4; j2 = i2++) { var a2 = CARA[i2], b2 = CARA[j2]; if ((a2[1] > y) !== (b2[1] > y) && x < (b2[0] - a2[0]) * (y - a2[1]) / (b2[1] - a2[1]) + a2[0]) r = !r; } return r; }
+          var lo = 10, hi = 1e5; for (var it = 0; it < 40; it++) { var mid = Math.sqrt(lo * hi), hw = E.W / 2 / mid, hh = E.H / 2 / mid, ok = [[-1, -1], [1, -1], [1, 1], [-1, 1]].every(function (c) { return dentroCara(OR.c[0] + c[0] * hw, OR.c[1] + c[1] * hh); }); if (ok) hi = mid; else lo = mid; }
+          SF = hi * 1.03;
+          // a la ciudad, sobre la tesela, en lo más cerca que llega el mapa: esa imagen y una versión más cerca, preparadas una vez
+          E.cambiarMundo('ciutat', { x: OR.c[0], y: OR.c[1], s: S1 });
+          // las teselas del mapa de cada zoom por el que vamos a pasar, ya pintadas (alejándose no hay nivel de arriba que tirar)
+          for (var sz = S1; sz < E.SMAX; sz *= 1.9) { E.cam.s = sz; E.limites(); E.pintarTodo(); }
+          E.cam.x = OR.c[0]; E.cam.y = OR.c[1]; E.cam.s = E.SMAX; E.limites(); E.pintarTodo(); A = X.copia();
+          var W = E.W, H = E.H, d = dpr(), mg = 1.25; R = document.createElement('canvas'); R.width = Math.ceil(W * mg * d); R.height = Math.ceil(H * mg * d);
+          var x = R.getContext('2d'), k = SR * d; x.setTransform(k, 0, 0, k, R.width / 2 - OR.c[0] * k, R.height / 2 - OR.c[1] * k);
+          x.drawImage(A, OR.c[0] - W / 2 / E.SMAX, OR.c[1] - H / 2 / E.SMAX, W / E.SMAX, H / E.SMAX);
+          var r = Math.hypot(W, H) * mg / 2 / SR; M.pintarDibujo(x, M.DIBUJOS[m.d], m.X, m.Y, m.esc || 1, SR, 1.5, JW, HL, sem, [OR.c[0] - r, OR.c[1] - r, OR.c[0] + r, OR.c[1] + r]);
+        }
+        var s = sDe(t); E.cam.x = OR.c[0]; E.cam.y = OR.c[1]; E.cam.s = Math.min(E.SMAX, s); E.limites();
+      },
+      frente: function (ctx, t) {
+        var W = E.W, H = E.H, s = sDe(t);
+        if (!listo || s <= E.SMAX) return;   // desde aquí, lo pinta el mapa
+        ctx.save(); ctx.fillStyle = '#e6dcc7'; ctx.fillRect(0, 0, W, H); ctx.translate(W / 2, H / 2); ctx.scale(s, s); ctx.translate(-OR.c[0], -OR.c[1]);
+        var cA = E.SMAX, aA = 1 - U.tramo(s, 18, 24), aR = U.tramo(s, 7, 11) * (1 - U.tramo(s, 40, 56)), aV = U.tramo(s, 34, 56);
+        if (aA > 0) ctx.drawImage(A, OR.c[0] - W / 2 / cA, OR.c[1] - H / 2 / cA, W / cA, H / cA);
+        if (aR > 0) { ctx.globalAlpha = Math.min(1, aR * 1.6); var bw = W * 1.25 / SR, bh = H * 1.25 / SR; ctx.drawImage(R, OR.c[0] - bw / 2, OR.c[1] - bh / 2, bw, bh); ctx.globalAlpha = 1; }
+        if (aV > 0) { var rr = Math.hypot(W, H) / 2 / s + 1; ctx.globalAlpha = aV; M.pintarDibujo(ctx, M.DIBUJOS[m.d], m.X, m.Y, m.esc || 1, s, 1.5, JW, HL, sem, [OR.c[0] - rr, OR.c[1] - rr, OR.c[0] + rr, OR.c[1] + rr]); ctx.globalAlpha = 1; }
+        // la cara de la tesela es lo que se veía del templo, encuadrado igual que en la entrada
+        var b0 = [1e9, 1e9, -1e9, -1e9]; CARA.forEach(function (v) { b0[0] = Math.min(b0[0], v[0]); b0[1] = Math.min(b0[1], v[1]); b0[2] = Math.max(b0[2], v[0]); b0[3] = Math.max(b0[3], v[1]); });
+        var vx0 = Math.max(b0[0], OR.c[0] - W / 2 / s), vy0 = Math.max(b0[1], OR.c[1] - H / 2 / s), vx1 = Math.min(b0[2], OR.c[0] + W / 2 / s), vy1 = Math.min(b0[3], OR.c[1] + H / 2 / s);
+        var bw3 = Math.max(vx1 - vx0, (vy1 - vy0) * W / H), bh3 = bw3 * H / W, bcx = (vx0 + vx1) / 2, bcy = (vy0 + vy1) / 2;
+        ctx.beginPath(); CARA.forEach(function (v, k) { k ? ctx.lineTo(v[0], v[1]) : ctx.moveTo(v[0], v[1]); }); ctx.closePath(); ctx.clip();
+        ctx.drawImage(B, bcx - bw3 / 2, bcy - bh3 / 2, bw3, bh3);
+        ctx.restore();
+      },
+      fin: function () { A = B = R = null; if (E.mundo !== 'ciutat') E.cambiarMundo('ciutat', { x: OR.c[0], y: OR.c[1], s: S1 }); }
+    };
+  }
+  BC.entradas.salir = salirTesela;
+
   /* ---------- 10 · trencadís: romper y recomponer ---------- */
   function voronoi(W, H, sitios) {   // las celdas: el rectángulo de la pantalla recortado por las mediatrices
     return sitios.map(function (s, i) {
