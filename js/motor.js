@@ -326,6 +326,12 @@
      Cada mundo da lo mismo (LIM, S0, NMAX, SMAX, FONDO, escala, lado, pintarTesela) y guarda su cámara y sus teselas,
      así que al volver a la ciudad está todo como se dejó. */
   var cajas = {}, camaras = {};
+  // pintar una tesela de otro mundo en su caché, sin cambiar de mundo (para preparar la vuelta a la ciudad desde el templo)
+  E.cajaDe = function (nombre) { return nombre === E.mundo ? E.cache : (cajas[nombre] || (cajas[nombre] = new Map())); };
+  E.pintarFuera = function (nombre, mapa, L, i, j) {
+    var c = E.cajaDe(nombre), k = L + '/' + i + '/' + j; if (c.has(k)) return false;
+    var tl = mapa.pintarTesela(L, i, j); tl.uso = E.t; c.set(k, tl); return true;
+  };
   E.cambiarMundo = function (nombre, cam) {
     if (nombre === E.mundo) return;
     cajas[E.mundo] = E.cache; camaras[E.mundo] = { x: E.cam.x, y: E.cam.y, s: E.cam.s };

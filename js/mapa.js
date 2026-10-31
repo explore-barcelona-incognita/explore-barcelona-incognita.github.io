@@ -273,7 +273,7 @@
     d.linea([[x, alto * 0.975], [x, alto * 1.02]], 1.2, '#f4d27a');
   }
   var DIBUJOS = {
-    sagrada: function (d) {
+    sagrada: function (d, L, z) {
       // la nave detrás, con vitrales
       d.rect(-118, 0, 118, 92, PM.piedraC, { vol: 0.1 });
       for (var i = -4; i <= 4; i++) if (Math.abs(i) > 1) d.forma(arco(i * 25 - 4, i * 25 + 4, 22, 66, 'ojival'), PM.vitral, { ts: 0.4 });
@@ -300,6 +300,12 @@
       d.elipse(0, 86, 9, 6, PM.oro, { ts: 0.4 });   // la estrella de la Natividad
       d.rect(-122, -9, 122, 0, PM.piedraC, { ts: 0.7 });   // las escaleras
       d.linea([[-122, -4.5], [122, -4.5]], 1, 'rgba(120,90,50,0.5)');
+      // la pista de la puerta, muy escondida (Pau 31/10): cinco teselas de oro con G·A·U·D·Í repartidas por la fachada, de
+      // izquierda a derecha; solo existen con el zoom máximo (z = px por metro del dibujo)
+      if (z >= 5) [['G', -94, 58], ['A', -51, 131], ['U', -9, 47], ['D', 35, 92], ['Í', 79, 22]].forEach(function (l) {
+        d.elipse(l[1], l[2], 1.5, 1.5, ['#f4c24e', '#f2b33d', '#e9b64a'], { ts: 0.5 });
+        d.texto(l[0], l[1], l[2] - 0.1, 2.1, 'rgba(70,40,10,0.92)');
+      });
     },
     glories: function (d) {
       var perfil = [[-30, 0], [30, 0]];
