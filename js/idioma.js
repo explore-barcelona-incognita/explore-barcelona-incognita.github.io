@@ -77,9 +77,9 @@
         pie: 'Colonia Iulia Augusta Faventia Paterna Barcino · c. 10 BC' }],
     sagrada: [
       { pista: 'Lleva más de un siglo creciendo. Acércate y quédate a mirarla.',
-        texto: 'La primera piedra se puso el 19 de marzo de 1882 y Gaudí se hizo cargo de la obra un año después. En febrero de 2026, la cruz de la torre de Jesucristo la llevó a 172,5 metros: la iglesia más alta del mundo. Y aún no está terminada.' },
+        texto: 'La primera piedra se puso el 19 de marzo de 1882 y Gaudí se hizo cargo de la obra un año después. En febrero de 2026, la cruz de la torre de Jesucristo la llevó a 172,5 metros: la iglesia más alta del mundo. Y aún no está terminada. Dicen que quien escribe el nombre de su arquitecto puede entrar.' },
       { pista: 'It has been growing for over a century. Come close and stay to look at it.',
-        texto: 'The first stone was laid on 19 March 1882, and Gaudí took over the work a year later. In February 2026 the cross on the Tower of Jesus Christ brought it to 172.5 metres: the tallest church in the world. And it still isn’t finished.' }],
+        texto: 'The first stone was laid on 19 March 1882, and Gaudí took over the work a year later. In February 2026 the cross on the Tower of Jesus Christ brought it to 172.5 metres: the tallest church in the world. And it still isn’t finished. They say whoever types its architect’s name can step inside.' }],
     cerda: [
       { nombre: 'Plan Cerdà', pista: 'Alguien cortó las esquinas de la ciudad para que se viera mejor.',
         texto: 'En 1859 se aprobó el plan del ingeniero Ildefons Cerdà para que Barcelona creciera fuera de sus murallas: una cuadrícula de manzanas de unos 113 metros con las esquinas cortadas a 45°, los chaflanes, para ganar luz, aire y visibilidad en cada cruce.' },
@@ -141,6 +141,8 @@
       return h[campo];   // los nombres propios (Barcino, Font Màgica…) no cambian
     },
     en: function (fn) { oyentes.push(fn); },
+    // otros archivos añaden sus textos (la Sagrada Família, js/sagrada/textos.js)
+    anadir: function (ui, sec) { var k; for (k in ui || {}) UI[k] = ui[k]; for (k in sec || {}) SECRETOS[k] = sec[k]; },
     cambiar: function (l) {
       if (LENGUAS.indexOf(l) < 0 || l === I.actual) return;
       I.actual = l;

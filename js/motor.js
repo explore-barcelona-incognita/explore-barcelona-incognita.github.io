@@ -21,7 +21,7 @@
 
   var M, cv, ctx;
   var E = BC.motor = {
-    W: 0, H: 0, dpr: 1, ligero: false, t: 0, escena: null, bloqueado: false, ultimoInput: 0, lectura: 5000, senal: 0,
+    W: 0, H: 0, dpr: 1, ligero: false, mundo: 'ciutat', t: 0, escena: null, bloqueado: false, ultimoInput: 0, lectura: 5000, senal: 0,
     cam: { x: 750, y: -1550, s: 0 }, puntero: { x: 0, y: 0, sobre: false, tipo: 'mouse' }, capas: [], SMAX: 6,
     cache: new Map(), cola: [], taller: { ocupado: false, ms: 0 }
   };
@@ -83,9 +83,9 @@
   }
 
   /* ---------- las teselas: el nivel, dibujarlas y el taller ---------- */
-  function nivel() { return Math.max(0, Math.min(8, Math.round(Math.log2(E.cam.s / M.S0) + 0.25))); }
+  function nivel() { return Math.max(0, Math.min(M.NMAX || 8, Math.round(Math.log2(E.cam.s / M.S0) + 0.25))); }
   function dibujarMapa(t) {
-    ctx.setTransform(E.dpr, 0, 0, E.dpr, 0, 0); ctx.fillStyle = '#e6dcc7'; ctx.fillRect(0, 0, E.W, E.H);
+    ctx.setTransform(E.dpr, 0, 0, E.dpr, 0, 0); ctx.fillStyle = M.FONDO || '#e6dcc7'; ctx.fillRect(0, 0, E.W, E.H);
     var L = nivel(), w = M.lado(L), tam = M.T * E.cam.s / M.escala(L), c = E.cam;
     var x0 = c.x - E.W / 2 / c.s, y0 = c.y - E.H / 2 / c.s;
     var i0 = Math.floor(x0 / w), i1 = Math.floor((x0 + E.W / c.s) / w), j0 = Math.floor(y0 / w), j1 = Math.floor((y0 + E.H / c.s) / w);
@@ -316,18 +316,33 @@
   /* ---------- tamaño del lienzo ---------- */
   function medir() {
     var d = E.ligero ? 1 : Math.min(window.devicePixelRatio || 1, 2), cambia = d !== E.dpr;
-    E.W = window.innerWidth; E.H = window.innerHeight; E.dpr = d; M.ponerDpr(d);
+    E.W = window.innerWidth; E.H = window.innerHeight; E.dpr = d; [BC.mapa, BC.sagrada].forEach(function (w) { if (w && w.ponerDpr) w.ponerDpr(d); });
     cv.width = Math.round(E.W * d); cv.height = Math.round(E.H * d); cv.style.width = E.W + 'px'; cv.style.height = E.H + 'px';
-    if (cambia) E.cache.clear();
+    if (cambia) { E.cache.clear(); cajas = {}; }
     limites();
   }
+
+  /* ---------- los mundos: la ciudad (BC.mapa) y, dentro de la Sagrada Família, su corte (BC.sagrada) ----------
+     Cada mundo da lo mismo (LIM, S0, NMAX, SMAX, FONDO, escala, lado, pintarTesela) y guarda su cámara y sus teselas,
+     así que al volver a la ciudad está todo como se dejó. */
+  var cajas = {}, camaras = {};
+  E.cambiarMundo = function (nombre, cam) {
+    if (nombre === E.mundo) return;
+    cajas[E.mundo] = E.cache; camaras[E.mundo] = { x: E.cam.x, y: E.cam.y, s: E.cam.s };
+    E.mundo = nombre; M = nombre === 'sagrada' ? BC.sagrada : BC.mapa; E.SMAX = M.SMAX || 6;
+    E.cache = cajas[nombre] || new Map(); E.cola.length = 0; E.parar(); arr = null; pinza = null; E.rastro.length = 0;
+    var c = cam || camaras[nombre] || M.inicio || {}; E.cam.x = c.x != null ? c.x : 0; E.cam.y = c.y != null ? c.y : 0; E.cam.s = c.s || E.sMin(); limites();
+    if (!cajas[nombre]) E.precalentar();
+    document.documentElement.classList.toggle('en-sagrada', nombre === 'sagrada');
+    emitir('mundo', { mundo: nombre });
+  };
 
   /* ---------- arranque y depuración ---------- */
   E.iniciar = function (lienzo, listo) {
     M = BC.mapa; cv = lienzo; ctx = cv.getContext('2d', { alpha: false });
     E.dpr = 0; medir(); E.cam.s = E.cam.s || E.sMin(); limites();
     escuchar();
-    window.addEventListener('resize', function () { E.cache.clear(); medir(); });
+    window.addEventListener('resize', function () { E.cache.clear(); cajas = {}; medir(); });
     M.cargar(function () {
       E.precalentar();
       if (listo) listo();

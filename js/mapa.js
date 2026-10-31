@@ -634,11 +634,17 @@
   // pinta un monumento en la tesela (tb = la caja de la tesela en metros girados)
   function pintarMonumento(x, m, s, jw, hl, id, tb) {
     // de lejos se exageran (como en un mapa pintado) para que se lean; de cerca van a su tamaño
-    var X = m.X, Y = m.Y, fz = Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1), ts0 = Math.max(4.4 / (s * fz), 1.5), sem = id * 977;
-    function P(lx, ly) { return [X + lx * fz, Y - ly * fz]; }
-    var L = [(tb[0] - X) / fz, (Y - tb[3]) / fz, (tb[2] - X) / fz, (Y - tb[1]) / fz];   // la tesela, en metros del dibujo
+    var X = m.X, Y = m.Y, fz = Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1), ts0 = Math.max(4.4 / (s * fz), 1.5);
     // la sombra en el suelo
     x.save(); x.globalCompositeOperation = 'multiply'; x.fillStyle = 'rgba(120,80,40,0.25)'; x.beginPath(); x.ellipse(X + m.ancho * 0.25 * fz, Y + 4 * fz, m.ancho * 1.05 * fz, m.ancho * 0.2 * fz, 0, 0, 6.2832); x.fill(); x.restore();
+    pintarDibujo(x, DIBUJOS[m.d], X, Y, fz, s, ts0, jw, hl, id * 977, tb);
+  }
+  // el lápiz de teselas: pinta un dibujo (una función que recibe d.forma/rect/elipse/linea/texto, en metros con la y hacia
+  // arriba) con su origen en (X, Y) del plano y ampliado fz, solo lo que cae en la tesela tb. También lo usa el corte de la
+  // Sagrada Família (js/sagrada/seccio.js)
+  function pintarDibujo(x, dibujo, X, Y, fz, s, ts0, jw, hl, sem, tb, cache) {
+    function P(lx, ly) { return [X + lx * fz, Y - ly * fz]; }
+    var L = [(tb[0] - X) / fz, (Y - tb[3]) / fz, (tb[2] - X) / fz, (Y - tb[1]) / fz];   // la tesela, en metros del dibujo
     function camino(pts) { var c = new Path2D(); pts.forEach(function (q, i) { var p = P(q[0], q[1]); i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]); }); c.closePath(); return c; }
     // primero se apuntan todas las órdenes del dibujo; luego se pintan en orden. Así cada forma sabe qué formas
     // opacas van encima y no pinta las teselas que quedarían tapadas (el Camp Nou son anillos uno sobre otro)
@@ -648,8 +654,16 @@
     function pintarForma(pts, pal, op, ss, encima) {
         var cj = cajaDe(pts);
         if (cj[2] < L[0] || cj[0] > L[2] || cj[3] < L[1] || cj[1] > L[3]) return;
-        var c = camino(pts), ts = Math.max(ts0 * (op.ts || 1), 3.4 / (s * fz)),   // nunca teselas de menos de 3,4 px
+        var c = camino(pts), ts = Math.max(ts0 * (op.ts || 1), (cache && s * fz >= 64 ? 6 : 3.4) / (s * fz)),   // nunca teselas de menos de 3,4 px (en el corte de la Sagrada Família, de muy cerca, de menos de 6)
              jwl = Math.min(jw, ts * fz * 0.14), cx = (cj[0] + cj[2]) / 2, hw = Math.max(1, (cj[2] - cj[0]) / 2), cy = (cj[1] + cj[3]) / 2;
+        // en un dibujo grande (el corte de la Sagrada Família), una forma que cabe en una tesela y media es una sola pieza
+        if (cache && cj[2] - cj[0] < ts * 1.6 && cj[3] - cj[1] < ts * 1.6) {
+          var pu = op.banda ? op.banda[0][1] : pal; if (!pu) return;
+          if (op.alfa) { x.save(); x.globalAlpha = op.alfa; }
+          pieza(x, pts.map(function (q) { return P(q[0], q[1]); }), tono(pu[Math.floor(h(ss, 1, 2) * pu.length)], 0.94 + h(ss, 3, 4) * 0.12), jwl, Math.min(hl, ts * fz * 0.12));
+          if (op.alfa) x.restore();
+          return;
+        }
         if (!op.alfa) { x.fillStyle = JUNTA; x.fill(c); }
         x.save(); x.clip(c); if (op.alfa) x.globalAlpha = op.alfa;
         var i0 = Math.floor(Math.max(cj[0], L[0]) / ts) - 1, i1 = Math.ceil(Math.min(cj[2], L[2]) / ts) + 1, j0 = Math.floor(Math.max(cj[1], L[1]) / ts) - 1, j1 = Math.ceil(Math.min(cj[3], L[3]) / ts) + 1;
@@ -678,7 +692,7 @@
     var d = {
       forma: function (pts, pal, op) { op = op || {}; sem += 13; ordenes.push({ f: 1, pts: pts, pal: pal, op: op, ss: sem, cj: cajaDe(pts) }); },
       rect: function (x0, y0, x1, y1, pal, op) { d.forma([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], pal, op); },
-      elipse: function (cx, cy, rx, ry, pal, op) { d.forma(elipsePts(cx, cy, rx, ry, 0, 6.2832, Math.max(10, Math.min(36, Math.round((rx + ry) * fz * s / 3)))), pal, op); },
+      elipse: function (cx, cy, rx, ry, pal, op) { d.forma(elipsePts(cx, cy, rx, ry, 0, 6.2832, Math.max(10, Math.min(cache ? 96 : 36, Math.round((rx + ry) * fz * s / 3)))), pal, op); },   // en el corte de la Sagrada Família, círculos más redondos de muy cerca
       linea: function () { ordenes.push({ f: 2, a: arguments }); },
       texto: function () { ordenes.push({ f: 3, a: arguments }); }
     };
@@ -697,11 +711,15 @@
         x.fillStyle = color; x.fillText(t, p[0], p[1]); x.restore();
       }
     };
-    DIBUJOS[m.d](d);
-    ordenes.forEach(function (o, k) {
+    // las órdenes de un dibujo grande (el corte de la Sagrada Família) se apuntan una vez por escala y se guardan en «cache»
+    if (cache && cache[s * fz]) ordenes = cache[s * fz];
+    else { dibujo(d, L, s * fz); if (cache) cache[s * fz] = ordenes; }   // el dibujo sabe a qué escala se pinta (para poner más detalle de cerca)
+    // solo las formas que tocan la tesela (con un margen) entran en juego; las líneas y los textos miran su caja al pintarse
+    var M2 = 2 / (s * fz), vis = ordenes.filter(function (o) { return o.f !== 1 || !(o.cj[2] < L[0] - M2 || o.cj[0] > L[2] + M2 || o.cj[3] < L[1] - M2 || o.cj[1] > L[3] + M2); });
+    vis.forEach(function (o, k) {
       if (o.f === 1) {
         var encima = [];
-        for (var q = k + 1; q < ordenes.length; q++) { var u = ordenes[q]; if (u.f === 1 && !u.op.alfa) encima.push(u); }
+        for (var q = k + 1; q < vis.length; q++) { var u = vis[q]; if (u.f === 1 && !u.op.alfa) encima.push(u); }
         pintarForma(o.pts, o.pal, o.op, o.ss, encima);
       } else if (o.f === 2) hacer.linea.apply(null, o.a);
       else hacer.texto.apply(null, o.a);
@@ -861,7 +879,7 @@
     ll: ll, mundoAGirado: mundoAGirado, callesNombre: callesNombre, callesEn: callesEn, enEixample: enEixample, aCerda: aCerda, deCerda: deCerda, CERDA: CERDA, anchoCarrer: ESTILO.carrer.w,
     S0: S0, T: T, escala: escala, lado: lado, pintarTesela: pintarTesela,
     girar: girar, desgirar: desgirar, claseEn: claseEn, clases: N, barrio: barrio,
-    monumentos: MONUMENTOS, monumento: monumento, enMonumento: enMonumento, cajaMonumento: cajaMonumento, pieza: pieza, tono: tono, h: h,
+    monumentos: MONUMENTOS, monumento: monumento, pintarDibujo: pintarDibujo, DIBUJOS: DIBUJOS, PM: PM, arco: arco, huso: huso, elipsePts: elipsePts, torreSagrada: torreSagrada, JUNTA: JUNTA, grano: grano, enMonumento: enMonumento, cajaMonumento: cajaMonumento, pieza: pieza, tono: tono, h: h,
     cargar: cargarClases, ponerDpr: function (d) { DPR = d; },
     LIM: [-7500, -7400, 9000, 4300]   // lo que se puede recorrer (el alejamiento máximo lo llena): del Tibidabo a bastante mar
   };

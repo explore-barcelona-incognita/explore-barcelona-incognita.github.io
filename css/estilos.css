@@ -368,3 +368,42 @@ button:focus-visible { outline: 1px solid var(--acento); outline-offset: 3px; }
 .con-mosaico .marca, .con-mosaico .b-cuaderno, .con-mosaico .hud-izq, .con-mosaico .hud-der, .con-mosaico .aviso, .con-mosaico .creditos-cerrar { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85); }
 .con-mosaico .hud-izq span, .con-mosaico .hud-der, .con-mosaico .sub { color: rgba(243, 236, 224, 0.72); }
 .con-mosaico .hud-izq b { color: var(--hueso); }
+
+/* ---------- dentro de la Sagrada Família (Pau, 31/10): el botón para volver a la ciudad ----------
+   Ocupa el sitio de la ayuda de abajo a la derecha (que allí no hace falta: el corte no es de OpenStreetMap) */
+.b-tornar {
+  position: fixed; z-index: 30; right: calc(var(--margen) + 8px); bottom: calc(var(--margen) + 2px);
+  display: none; align-items: center; gap: 10px; padding: 13px 16px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hueso);
+  background: rgba(20, 17, 15, 0.82); border: 1px solid var(--linea); cursor: pointer; transition: opacity 0.6s;
+}
+.b-tornar kbd { font: inherit; font-size: 10px; padding: 2px 6px; border: 1px solid var(--linea); color: var(--hueso-3); }
+.en-sagrada .b-tornar { display: inline-flex; }
+.en-sagrada .hud-der { display: none; }
+.en-escena .b-tornar, .cuaderno-abierto .b-tornar { opacity: 0; pointer-events: none; }
+.con-mosaico .b-tornar { background: linear-gradient(rgba(16, 13, 11, 0.74), rgba(16, 13, 11, 0.8)), var(--mosaico-fondo); background-size: auto, 120px 120px; border: 1px solid rgba(242, 179, 61, 0.28); box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35); }
+.con-mosaico .b-tornar::after { content: ""; position: absolute; inset: -1px; pointer-events: none; background: var(--mosaico-ribete) left top / 132px 5px repeat-x, var(--mosaico-ribete) left bottom / 132px 5px repeat-x, var(--mosaico-ribete-v) left top / 5px 132px repeat-y, var(--mosaico-ribete-v) right top / 5px 132px repeat-y; }
+.con-mosaico .b-tornar:hover { background: linear-gradient(rgba(255, 230, 170, 0.08), rgba(120, 70, 10, 0.12)), var(--mosaico-oro); background-size: auto, 60px 60px; color: #1a120a; }
+@media (max-width: 700px) { .b-tornar { right: auto; left: 50%; transform: translateX(-50%); bottom: calc(var(--margen) + 4px); } .b-tornar kbd { display: none; } }
+
+/* ---------- la tarjeta, legible sobre cualquier fondo (Pau 31/10: «se leen muy mal») ----------
+   Antes era texto suelto sobre un halo oscuro difuminado, que sobre el mosaico claro no tapaba. Ahora es un panel de
+   trencadís oscuro como los demás, con su marco de teselas, y el texto con más contraste y una medida más corta. */
+.con-mosaico .tarjeta {
+  max-width: 500px; padding: 26px 30px 24px;
+  background: linear-gradient(rgba(16, 13, 11, 0.9), rgba(16, 13, 11, 0.93)), var(--mosaico-fondo); background-size: auto, 120px 120px;
+  border: 1px solid rgba(242, 179, 61, 0.3); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 240, 210, 0.08);
+}
+.con-mosaico .tarjeta::before { display: none; }
+.con-mosaico .tarjeta::after {
+  content: ""; position: absolute; inset: -1px; pointer-events: none;
+  background: var(--mosaico-ribete) left top / 132px 5px repeat-x, var(--mosaico-ribete) left bottom / 132px 5px repeat-x,
+    var(--mosaico-ribete-v) left top / 5px 132px repeat-y, var(--mosaico-ribete-v) right top / 5px 132px repeat-y;
+}
+.con-mosaico .t-tit { margin: 12px 0 14px; font-size: clamp(36px, 3.6vw, 50px); line-height: 1; text-shadow: none; color: var(--hueso); }
+.con-mosaico .t-txt { font-size: 18px; line-height: 1.45; color: rgba(243, 236, 224, 0.95); text-shadow: none; }
+.con-mosaico .t-pie { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(242, 179, 61, 0.22); color: rgba(243, 236, 224, 0.62); }
+@media (max-width: 700px) {
+  .con-mosaico .tarjeta { left: 12px; right: 12px; bottom: 70px; padding: 18px 18px 16px; max-height: 52vh; overflow: auto; }
+  .con-mosaico .t-tit { font-size: 32px; }
+  .con-mosaico .t-txt { font-size: 16px; }
+}

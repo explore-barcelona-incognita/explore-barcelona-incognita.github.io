@@ -19,7 +19,7 @@
     ['Poblenou', 41.4010, 2.2010, 0.2, 0.8]
   ].map(function (r) { var g = M.ll(r[1], r[2]); return { n: r[0], X: g[0], Y: g[1], z0: r[3], z1: r[4], serif: !!r[5], dx: r[6] || 0 }; });
   E.capas.push(function (ctx) {
-    if (E.escena) return;
+    if (E.escena || E.mundo !== 'ciutat') return;
     var s = E.cam.s;
     ROTULOS.forEach(function (r) {
       var a = U.clamp((s - r.z0) / (r.z0 * 0.25 + 0.02), 0, 1) * U.clamp((r.z1 - s) / (r.z1 * 0.2), 0, 1);

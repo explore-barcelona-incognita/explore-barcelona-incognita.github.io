@@ -8,7 +8,8 @@
   var CLAVE = 'barcelona-incognita.v1';   // no se cambia nunca: borraría el progreso de quien ya juega
   var PRUEBA = /[?&]prueba\b/.test(location.search);
   var I = BC.interfaz = { prueba: PRUEBA };
-  var huevos = [], final = null;
+  var huevos = [], finales = {};
+  // estado.final es el de la ciudad; estado.sagrada dice si ya se entró al templo y estado.finalSagrada, si se acabó
   var estado = { hallados: {}, final: false, introVista: false };
   var $ = function (id) { return document.getElementById(id); };
   var raiz = document.documentElement;
@@ -16,15 +17,22 @@
   var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: 'https://www.linkedin.com/in/pau-morat%C3%B3-sebasti%C3%A0-5554a01b2' };
 
   /* ---------- registro ----------
-     Cada secreto: { id, n, nombre, tipo, pista, lugar?: () => [X, Y] en el plano girado, zmin?, detectar(api), escena(motor, datos) } */
+     Cada secreto: { id, n, nombre, tipo, pista, mundo?: 'sagrada', lugar?: () => [X, Y] en el plano de su mundo, zmin?, detectar(api), escena(motor, datos) }
+     Los de la ciudad no llevan «mundo»; los de dentro de la Sagrada Família llevan mundo: 'sagrada'. Cada mundo tiene su
+     cuaderno, su recuento y su final; el progreso es uno solo. */
   BC.registrar = function (h) { huevos.push(h); huevos.sort(function (a, b) { return a.n - b.n; }); };
-  BC.registrarFinal = function (h) { final = h; };
+  BC.registrarFinal = function (h) { finales[h.mundo || 'ciutat'] = h; };
+  function mundoDe(h) { return h.mundo || 'ciutat'; }
+  function delMundo(m) { m = m || E.mundo; return huevos.filter(function (h) { return mundoDe(h) === m; }); }
+  function finalHecho(m) { return (m || E.mundo) === 'sagrada' ? !!estado.finalSagrada : !!estado.final; }
   I.huevos = function () { return huevos; };
+  I.delMundo = delMundo;
   I.estado = function () { return estado; };
+  I.guardar = function () { guardar(); };
 
   function cargar() { try { var s = localStorage.getItem(CLAVE); if (s) { var o = JSON.parse(s); for (var k in o) estado[k] = o[k]; } } catch (e) { /* sin almacenamiento */ } }
   function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify(estado)); } catch (e) { /* sin almacenamiento */ } }
-  function cuantos() { return huevos.filter(function (h) { return estado.hallados[h.id]; }).length; }
+  function cuantos(m) { return delMundo(m).filter(function (h) { return estado.hallados[h.id]; }).length; }
 
   /* ---------- disparar un secreto ---------- */
   I.disparar = function (h, datos, op) {
@@ -36,27 +44,29 @@
     h.ultimosDatos = datos || h.ultimosDatos || null;
     var envoltorio = { id: h.id, escena: function (motor) {
       var s = h.escena(motor, datos || h.ultimosDatos || null);
-      if (s && s.tarjeta && !s.tarjeta.etiqueta) s.tarjeta.etiqueta = ID.t('secreto') + ' ' + U.dos(h.n) + ' / ' + U.dos(huevos.length) + ' · ' + ID.tipo(h.tipo);
+      if (s && s.tarjeta && !s.tarjeta.etiqueta) s.tarjeta.etiqueta = ID.t('secreto') + ' ' + U.dos(h.n) + ' / ' + U.dos(delMundo(mundoDe(h)).length) + ' · ' + ID.tipo(h.tipo);
       if (s && s.tarjeta) ['titulo', 'texto', 'pie'].forEach(function (k) { var v = ID.secreto(h, k); if (v != null && ID.actual !== 'ca') s.tarjeta[k] = v; });
       return s;
     } };
     E.reproducir(envoltorio, function () {
       pintarLista(nuevo ? h.id : null);
       if (nuevo) {
-        aviso(ID.t('encontrado') + ' <b>' + U.dos(cuantos()) + '/' + U.dos(huevos.length) + '</b> · ' + ID.secreto(h, 'nombre'));
+        var m = mundoDe(h);
+        aviso(ID.t('encontrado') + ' <b>' + U.dos(cuantos(m)) + '/' + U.dos(delMundo(m).length) + '</b> · ' + ID.secreto(h, 'nombre'));
         var b = $('b-cuaderno'); b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso');
-        if (cuantos() === huevos.length && !estado.final && final) setTimeout(function () { I.verFinal(); }, 1600);
+        if (cuantos(m) === delMundo(m).length && !finalHecho(m) && finales[m]) setTimeout(function () { I.verFinal(m); }, 1600);
       }
     });
     return true;
   };
-  I.verFinal = function () {
-    if (!final || E.escena) return;
+  I.verFinal = function (m) {
+    m = m || E.mundo; var final = finales[m], lista = delMundo(m);
+    if (!final || E.escena || m !== E.mundo) return;
     cerrarCuaderno();
     var primero = Infinity, ultimo = 0;
-    huevos.forEach(function (h) { var t = estado.hallados[h.id]; if (t) { primero = Math.min(primero, t); ultimo = Math.max(ultimo, t); } });
-    E.reproducir({ id: 'final', escena: function (motor) { return final.escena(motor, { desde: primero, hasta: ultimo, huevos: huevos }); } }, function () {
-      if (cuantos() === huevos.length) { estado.final = true; guardar(); }
+    lista.forEach(function (h) { var t = estado.hallados[h.id]; if (t) { primero = Math.min(primero, t); ultimo = Math.max(ultimo, t); } });
+    E.reproducir({ id: 'final', escena: function (motor) { return final.escena(motor, { desde: primero, hasta: ultimo, huevos: lista }); } }, function () {
+      if (cuantos(m) === lista.length) { if (m === 'sagrada') estado.finalSagrada = true; else estado.final = true; guardar(); }
       pintarLista();
       mostrarCreditos();
     });
@@ -115,8 +125,8 @@
   function el(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
 
   function pintarLista(recien) {
-    var ol = $('lista'); ol.innerHTML = '';
-    huevos.forEach(function (h) {
+    var ol = $('lista'), lista = delMundo(); ol.innerHTML = '';
+    lista.forEach(function (h) {
       var ok = !!estado.hallados[h.id];
       var li = el('li', 'entrada' + (ok ? ' hallada' : '') + (recien === h.id ? ' nueva' : ''));
       li.appendChild(el('div', 'e-num', U.dos(h.n)));
@@ -138,12 +148,12 @@
       li.appendChild(c); ol.appendChild(li);
     });
     var n = cuantos();
-    $('contador').textContent = U.dos(n) + '/' + U.dos(huevos.length);
-    var seg = $('segmentos'); seg.innerHTML = ''; seg.style.gridTemplateColumns = 'repeat(' + Math.max(1, huevos.length) + ', 1fr)';
-    for (var i = 0; i < huevos.length; i++) seg.appendChild(el('i', i < n ? 'si' : ''));
-    $('ver-final').hidden = !(estado.final || (PRUEBA && final));
-    $('c-credito-linea').hidden = !estado.final;
-    raiz.classList.toggle('cognita', !!estado.final);
+    $('contador').textContent = U.dos(n) + '/' + U.dos(lista.length);
+    var seg = $('segmentos'); seg.innerHTML = ''; seg.style.gridTemplateColumns = 'repeat(' + Math.max(1, lista.length) + ', 1fr)';
+    for (var i = 0; i < lista.length; i++) seg.appendChild(el('i', i < n ? 'si' : ''));
+    $('ver-final').hidden = !(finalHecho() || (PRUEBA && finales[E.mundo]));
+    $('c-credito-linea').hidden = !finalHecho();
+    raiz.classList.toggle('cognita', finalHecho());
   }
 
   /* ---------- instrumentos ---------- */
@@ -156,7 +166,7 @@
     // BATEC: el pulso sube cuando te acercas a un secreto de lugar que aún no has encontrado
     // (con ratón cuenta el puntero; en pantalla táctil, el centro de la vista)
     var objetivo = 0, p = E.puntero, ref = p.sobre && p.tipo === 'mouse' ? [p.x, p.y] : [E.W / 2, E.H / 2];
-    huevos.forEach(function (h) {
+    delMundo().forEach(function (h) {
       if (!h.lugar || estado.hallados[h.id]) return;
       var q = h.lugar(); if (!q) return;
       var sp = E.aPantalla(q[0], q[1]), cerca = U.clamp(1 - Math.hypot(sp[0] - ref[0], sp[1] - ref[1]) / (h.radio || 260), 0, 1);
@@ -164,12 +174,13 @@
     });
     E.senal += (objetivo - E.senal) * 0.12;
     if (++cuadroHud % 5) return;
-    $('h-altura').textContent = U.num(E.W / E.cam.s * 0.87) + ' m';
+    // ALTURA: en la ciudad, desde qué altura se mira; dentro de la Sagrada Família, a qué altura del suelo de la nave estás
+    $('h-altura').textContent = E.mundo === 'sagrada' ? U.num(-E.cam.y) + ' m' : U.num(E.W / E.cam.s * 0.87) + ' m';
     barras('h-batec', E.senal);
     $('h-batec').classList.toggle('latiendo', E.senal > 0.12);
     $('h-batec').style.animationDuration = (1.3 - E.senal * 0.75).toFixed(2) + 's';
     if (cuadroHud % 15 === 0) {
-      var b = BC.mapa.barrio(E.cam.x, E.cam.y);
+      var b = E.mundo === 'sagrada' ? BC.sagrada.zona(E.cam.x, E.cam.y) : BC.mapa.barrio(E.cam.x, E.cam.y);
       if (b !== barrioActual) { barrioActual = b; var hb = $('h-barri'); hb.classList.remove('cambia'); void hb.offsetWidth; hb.textContent = b; hb.classList.add('cambia'); }
     }
   }
@@ -197,26 +208,41 @@
   I.iniciar = function () {
     cargar();
     var tactil = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    function textos() { $('ayuda').textContent = ID.t(tactil ? 'ayudaTactil' : 'ayuda'); $('c-intro').textContent = ID.t('cIntro'); }
+    // los textos que cambian con el mundo: el título, el subtítulo, el cuaderno y el nombre del instrumento BARRI / ZONA
+    function textos() {
+      var sg = E.mundo === 'sagrada';
+      $('ayuda').textContent = ID.t(tactil ? 'ayudaTactil' : 'ayuda'); $('c-intro').textContent = ID.t(sg ? 'cIntroS' : 'cIntro');
+      document.querySelector('.titulo').innerHTML = (sg ? 'Sagrada Família' : 'Barcelona') + ' <em><span class="pre">in</span>cognita</em>';
+      var sub = document.querySelector('.marca .sub'); sub.setAttribute('data-i18n', sg ? 'subS' : 'sub'); sub.textContent = ID.t(sg ? 'subS' : 'sub');
+      var ct = $('cuaderno-titulo'); ct.setAttribute('data-i18n', sg ? 'cTituloS' : 'cTitulo'); ct.textContent = ID.t(sg ? 'cTituloS' : 'cTitulo');
+      var hb = $('h-barri').previousElementSibling; hb.setAttribute('data-i18n', sg ? 'hZona' : 'hBarri'); hb.textContent = ID.t(sg ? 'hZona' : 'hBarri');
+    }
     ID.aplicar(); textos();
+    E.en('mundo', function () { cerrarCuaderno(); barrioActual = ''; textos(); pintarLista(); });
     // el selector de idioma: cambia todo al momento
     document.querySelector('.idiomas').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) ID.cambiar(b.dataset.lang); });
     ID.en(function () { textos(); pintarLista(); });
 
     huevos.forEach(function (h) {
+      // cada secreto solo oye lo que pasa en su mundo y solo pinta sus capas allí
+      var suyo = mundoDe(h);
       h.detectar && h.detectar({
-        motor: E, en: E.en,
-        capa: function (fn) { E.capas.push(fn); },
+        motor: E,
+        en: function (n, fn) { E.en(n, function (d) { if (E.mundo === suyo) fn(d); }); },
+        capa: function (fn) { E.capas.push(function (ctx, t) { if (E.mundo === suyo) fn(ctx, t); }); },
         hallado: function () { return !!estado.hallados[h.id]; },
         disparar: function (datos) { return I.disparar(h, datos); }
       });
     });
     E.en('cuadro', instrumentos);
     E.en('tecla', tecla);
-    // ⌫ para volver: salta la escena o cierra el cuaderno o los créditos
+    // ⌫ para volver: salta la escena, cierra el cuaderno o los créditos y, dentro de la Sagrada Família, sale a la ciudad
     E.en('tecla', function (d) {
       if (d.key !== 'Backspace') return;
-      if (E.escena) E.saltar(); else { cerrarCuaderno(); cerrarCreditos(); }
+      if (E.escena) E.saltar();
+      else if ($('cuaderno').classList.contains('abierto')) cerrarCuaderno();
+      else if (!$('creditos').hidden) cerrarCreditos();
+      else if (E.mundo === 'sagrada' && BC.porta) BC.porta.sortir();
     });
 
     $('b-cuaderno').addEventListener('click', function () { $('cuaderno').classList.contains('abierto') ? cerrarCuaderno() : abrirCuaderno(); });
@@ -225,7 +251,7 @@
     $('ver-final').addEventListener('click', function () { I.verFinal(); });
     $('borrar').addEventListener('click', function () {
       if (!window.confirm(ID.t('confirmar'))) return;
-      estado = { hallados: {}, final: false, introVista: true }; guardar(); pintarLista();
+      estado = { hallados: {}, final: false, introVista: true, sagrada: estado.sagrada }; guardar(); pintarLista();
     });
 
     $('creditos-nombre').textContent = AUTOR.nombre;

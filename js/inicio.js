@@ -39,6 +39,7 @@
     disparar: function (id, datos) {
       if (id === 'final') { I.verFinal(); return true; }
       if (id === 'creditos') { I.mostrarCreditos(); return true; }
+      if (id === 'gaudi') return BC.porta.entrar();   // la puerta de la Sagrada Família (como escribir GAUDI)
       var h = buscar(id); return h ? I.disparar(h, datos, { prueba: true }) : false;
     },
     congelar: E.congelar, paso: E.paso, pintarTodo: E.pintarTodo,

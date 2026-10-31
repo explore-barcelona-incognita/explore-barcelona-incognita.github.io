@@ -28,7 +28,7 @@
       return {
         duracion: 14000 + L,
         tarjeta: { en: 6400, hasta: 13300 + L, titulo: 'Sagrada Família',
-          texto: 'La primera pedra es va posar el 19 de març de 1882, i Gaudí es va fer càrrec de l’obra un any després. El febrer de 2026, la creu de la torre de Jesucrist la va dur fins als 172,5 metres: l’església més alta del món. I encara no està acabada.',
+          texto: 'La primera pedra es va posar el 19 de març de 1882, i Gaudí es va fer càrrec de l’obra un any després. El febrer de 2026, la creu de la torre de Jesucrist la va dur fins als 172,5 metres: l’església més alta del món. I encara no està acabada. Diuen que qui escriu el nom del seu arquitecte hi pot entrar.',
           pie: 'Temple Expiatori de la Sagrada Família · 1882 –' },
         // la cámara empieza en la base y sube despacio por la fachada, como una grúa
         inicio: function () { var s = 1.25, f = fz(m, s); E.encuadrar(m.X, m.Y - 40 * f, s, 1900); },
