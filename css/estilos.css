@@ -294,7 +294,7 @@ button:focus-visible { outline: 1px solid var(--acento); outline-offset: 3px; }
 .cargando.fuera { opacity: 0; pointer-events: none; }
 .cargando-tesela { width: 16px; height: 16px; background: var(--acento); border-radius: 3px 5px 2px 6px; animation: tesela 1.6s var(--curva) infinite; }
 @keyframes tesela { 0% { transform: rotate(0) scale(0.8); opacity: 0.5; } 50% { transform: rotate(90deg) scale(1.1); opacity: 1; } 100% { transform: rotate(180deg) scale(0.8); opacity: 0.5; } }
-/* la entrada: la medalla de trencadís */
+/* la entrada: la medalla, la baldosa «flor de Barcelona» de mosaico */
 .intro { background: radial-gradient(ellipse at 50% 50%, rgba(20, 17, 15, 0.7), rgba(20, 17, 15, 0.94) 70%); }
 .intro-medalla { display: block; width: 150px; height: 150px; margin: 0 auto 8px; opacity: 0; transform: scale(0.92) rotate(-8deg); transition: opacity 1.2s var(--curva), transform 1.6s var(--curva); filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.5)); }
 .intro-medalla.listo { opacity: 1; transform: none; }

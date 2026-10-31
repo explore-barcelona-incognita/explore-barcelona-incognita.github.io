@@ -186,23 +186,10 @@
     setTimeout(function () { if (k.parentNode) k.parentNode.removeChild(k); }, 2300);
   }
 
-  /* ---------- la medalla de la entrada: un plato de trencadís pintado con las mismas piezas que el mapa ---------- */
+  /* ---------- la medalla de la entrada: la baldosa «flor de Barcelona» de mosaico, la misma del icono (js/baldosa.js) ---------- */
   function medalla() {
     var cvm = $('intro-medalla'); if (!cvm) return;
-    var M = BC.mapa, d = Math.min(window.devicePixelRatio || 1, 2), lado = 190, x = cvm.getContext('2d');
-    cvm.width = cvm.height = lado * d; x.setTransform(d, 0, 0, d, 0, 0);
-    var c = lado / 2, cols = [['#f2b33d', '#f4d27a', '#e9b64a'], ['#c43b2b', '#e8663a', '#d8452f'], ['#2f5fae', '#3b7dc4', '#4a8ed0'], ['#4f9a3c', '#6aa84a'], ['#f4efe3', '#e9e2cf']];
-    x.fillStyle = BC.color.junta; x.beginPath(); x.arc(c, c, c - 2, 0, 6.2832); x.fill();
-    var anillos = [[0, 16, 1, 0], [16, 38, 8, 1], [38, 62, 14, 2], [62, 82, 22, 3], [82, 93, 30, 4]];
-    anillos.forEach(function (a, k) {
-      for (var i = 0; i < a[2]; i++) {
-        var a0 = i / a[2] * 6.2832 + k * 0.3, a1 = (i + 1) / a[2] * 6.2832 + k * 0.3, q = [], n = Math.max(2, Math.round(6 / a[2] * 3));
-        if (a[0] === 0) { for (var j = 0; j < 14; j++) q.push([c + Math.cos(j / 14 * 6.2832) * a[1], c + Math.sin(j / 14 * 6.2832) * a[1]]); }
-        else { for (j = 0; j <= n; j++) { var an = a0 + (a1 - a0) * j / n; q.push([c + Math.cos(an) * a[1], c + Math.sin(an) * a[1]]); } for (j = n; j >= 0; j--) { an = a0 + (a1 - a0) * j / n; q.push([c + Math.cos(an) * a[0], c + Math.sin(an) * a[0]]); } }
-        var pal = k === 0 ? cols[0] : k === 4 ? cols[(i % 3 === 0) ? 2 : 4] : cols[(i + k) % 4], col = pal[i % pal.length];
-        M.pieza(x, q, M.tono(col, 0.94 + M.h(i, k, 3) * 0.12), 1.3, 1);
-      }
-    });
+    BC.baldosa(cvm, 150);
     cvm.classList.add('listo');
   }
 
