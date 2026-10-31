@@ -335,3 +335,36 @@ button:focus-visible { outline: 1px solid var(--acento); outline-offset: 3px; }
 .idiomas button[aria-pressed="true"] { color: var(--fondo); background: var(--acento); }
 .en-escena .idiomas, .cuaderno-abierto .idiomas { opacity: 0; pointer-events: none; }
 @media (max-width: 700px) { .idiomas { bottom: auto; top: calc(var(--margen) + 64px); right: calc(var(--margen) + 4px); } .idiomas button { padding: 6px 8px 5px; } }
+
+/* ---------- el acabado de mosaico de la interfaz (js/acabado.js, Pau 31/10) ----------
+   Fondo de trencadís oscuro bajo un velo (para que el texto se lea) y un ribete de teselas de colores abajo. */
+.con-mosaico .marca, .con-mosaico .b-cuaderno, .con-mosaico .hud-izq, .con-mosaico .hud-der, .con-mosaico .idiomas, .con-mosaico .aviso,
+.con-mosaico .intro button, .con-mosaico .creditos-enlace, .con-mosaico .creditos-cerrar, .con-mosaico .panel-prueba {
+  position: fixed; background: linear-gradient(rgba(16, 13, 11, 0.74), rgba(16, 13, 11, 0.8)), var(--mosaico-fondo); background-size: auto, 120px 120px;
+  border: 1px solid rgba(242, 179, 61, 0.28); box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 240, 210, 0.08);
+}
+.con-mosaico .intro button, .con-mosaico .creditos-enlace, .con-mosaico .creditos-cerrar { position: relative; }
+.con-mosaico .aviso { position: fixed; }
+.con-mosaico .marca::after, .con-mosaico .b-cuaderno::after, .con-mosaico .hud-izq::after, .con-mosaico .hud-der::after, .con-mosaico .idiomas::after, .con-mosaico .aviso::after,
+.con-mosaico .intro button::after, .con-mosaico .creditos-enlace::after, .con-mosaico .creditos-cerrar::after {
+  content: ""; position: absolute; inset: -1px; pointer-events: none;
+  /* el marco de teselas: arriba, abajo, izquierda y derecha */
+  background: var(--mosaico-ribete) left top / 132px 5px repeat-x, var(--mosaico-ribete) left bottom / 132px 5px repeat-x,
+    var(--mosaico-ribete-v) left top / 5px 132px repeat-y, var(--mosaico-ribete-v) right top / 5px 132px repeat-y;
+}
+.con-mosaico .marca { padding: 18px 22px 16px; }
+.con-mosaico .b-cuaderno { padding: 15px 18px 15px; }
+.con-mosaico .hud-izq { padding: 14px 18px 14px; }
+.con-mosaico .hud-der { padding: 13px 16px 13px; }
+.con-mosaico .idiomas { padding: 5px; }
+.con-mosaico .aviso { padding: 14px 20px; }
+.con-mosaico .intro button, .con-mosaico .creditos-enlace, .con-mosaico .creditos-cerrar { padding: 19px 27px; }
+/* lo activo y lo que se va a pulsar: teselas de oro */
+.con-mosaico .idiomas button[aria-pressed="true"], .con-mosaico .intro button:hover, .con-mosaico .creditos-enlace:hover {
+  background: linear-gradient(rgba(255, 230, 170, 0.08), rgba(120, 70, 10, 0.12)), var(--mosaico-oro); background-size: auto, 60px 60px; color: #1a120a; text-shadow: 0 1px 0 rgba(255, 240, 200, 0.5);
+}
+.con-mosaico .b-cuaderno:hover, .con-mosaico .creditos-cerrar:hover { border-color: rgba(242, 179, 61, 0.6); }
+/* más legible: el texto de los paneles, más claro y con una sombra suave que lo separa de las teselas */
+.con-mosaico .marca, .con-mosaico .b-cuaderno, .con-mosaico .hud-izq, .con-mosaico .hud-der, .con-mosaico .aviso, .con-mosaico .creditos-cerrar { text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85); }
+.con-mosaico .hud-izq span, .con-mosaico .hud-der, .con-mosaico .sub { color: rgba(243, 236, 224, 0.72); }
+.con-mosaico .hud-izq b { color: var(--hueso); }
