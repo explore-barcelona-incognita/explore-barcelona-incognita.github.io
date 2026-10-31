@@ -12,6 +12,7 @@
   var estado = { hallados: {}, final: false, introVista: false };
   var $ = function (id) { return document.getElementById(id); };
   var raiz = document.documentElement;
+  var ID = BC.idioma;
   var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: 'https://www.linkedin.com/in/pau-morat%C3%B3-sebasti%C3%A0-5554a01b2' };
 
   /* ---------- registro ----------
@@ -35,13 +36,14 @@
     h.ultimosDatos = datos || h.ultimosDatos || null;
     var envoltorio = { id: h.id, escena: function (motor) {
       var s = h.escena(motor, datos || h.ultimosDatos || null);
-      if (s && s.tarjeta && !s.tarjeta.etiqueta) s.tarjeta.etiqueta = 'Secreto ' + U.dos(h.n) + ' / ' + U.dos(huevos.length) + ' · ' + h.tipo;
+      if (s && s.tarjeta && !s.tarjeta.etiqueta) s.tarjeta.etiqueta = ID.t('secreto') + ' ' + U.dos(h.n) + ' / ' + U.dos(huevos.length) + ' · ' + ID.tipo(h.tipo);
+      if (s && s.tarjeta) ['titulo', 'texto', 'pie'].forEach(function (k) { var v = ID.secreto(h, k); if (v != null && ID.actual !== 'ca') s.tarjeta[k] = v; });
       return s;
     } };
     E.reproducir(envoltorio, function () {
       pintarLista(nuevo ? h.id : null);
       if (nuevo) {
-        aviso('Secreto encontrado <b>' + U.dos(cuantos()) + '/' + U.dos(huevos.length) + '</b> · ' + h.nombre);
+        aviso(ID.t('encontrado') + ' <b>' + U.dos(cuantos()) + '/' + U.dos(huevos.length) + '</b> · ' + ID.secreto(h, 'nombre'));
         var b = $('b-cuaderno'); b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso');
         if (cuantos() === huevos.length && !estado.final && final) setTimeout(function () { I.verFinal(); }, 1600);
       }
@@ -119,16 +121,16 @@
       var li = el('li', 'entrada' + (ok ? ' hallada' : '') + (recien === h.id ? ' nueva' : ''));
       li.appendChild(el('div', 'e-num', U.dos(h.n)));
       var c = el('div', 'e-cuerpo');
-      c.appendChild(el('div', 'e-tipo', h.tipo));
+      c.appendChild(el('div', 'e-tipo', ID.tipo(h.tipo)));
       var nom = el('div', 'e-nombre');
-      if (ok) nom.textContent = h.nombre;
-      else { var cen = el('span', 'e-censura'); cen.style.width = (h.nombre.length * 0.48 + 0.6) + 'em'; nom.appendChild(cen); nom.setAttribute('aria-label', 'Sin descubrir'); }
+      if (ok) nom.textContent = ID.secreto(h, 'nombre');
+      else { var cen = el('span', 'e-censura'); cen.style.width = (h.nombre.length * 0.48 + 0.6) + 'em'; nom.appendChild(cen); nom.setAttribute('aria-label', ID.t('porDescubrir')); }
       c.appendChild(nom);
-      c.appendChild(el('p', 'e-pista', h.pista));
+      c.appendChild(el('p', 'e-pista', ID.secreto(h, 'pista')));
       if (ok || PRUEBA) {
         var meta = el('div', 'e-meta');
-        if (ok) meta.appendChild(el('span', '', 'Encontrado ' + fecha(estado.hallados[h.id])));
-        var b = el('button', 'e-ver', ok ? '↻ Ver otra vez' : '▶ Probar');
+        if (ok) meta.appendChild(el('span', '', ID.t('trobat') + fecha(estado.hallados[h.id])));
+        var b = el('button', 'e-ver', ok ? ID.t('reveure') : ID.t('provar'));
         b.type = 'button';
         b.addEventListener('click', function () { I.disparar(h, null, { prueba: !ok }); });
         meta.appendChild(b); c.appendChild(meta);
@@ -208,8 +210,11 @@
   I.iniciar = function () {
     cargar();
     var tactil = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    $('ayuda').textContent = tactil ? 'Desliza para moverte · Pellizca para acercarte' : 'Arrastra para moverte · Rueda para acercarte';
-    $('c-intro').textContent = 'Los secretos escondidos en la ciudad. Cada pista apunta a uno; el nombre aparece cuando lo encuentras.';
+    function textos() { $('ayuda').textContent = ID.t(tactil ? 'ayudaTactil' : 'ayuda'); $('c-intro').textContent = ID.t('cIntro'); }
+    ID.aplicar(); textos();
+    // el selector de idioma: cambia todo al momento
+    document.querySelector('.idiomas').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) ID.cambiar(b.dataset.lang); });
+    ID.en(function () { textos(); pintarLista(); });
 
     huevos.forEach(function (h) {
       h.detectar && h.detectar({
@@ -232,7 +237,7 @@
     $('saltar').addEventListener('click', function () { E.saltar(); });
     $('ver-final').addEventListener('click', function () { I.verFinal(); });
     $('borrar').addEventListener('click', function () {
-      if (!window.confirm('¿Borrar todos los secretos encontrados en este navegador?')) return;
+      if (!window.confirm(ID.t('confirmar'))) return;
       estado = { hallados: {}, final: false, introVista: true }; guardar(); pintarLista();
     });
 

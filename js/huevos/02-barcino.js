@@ -10,8 +10,8 @@
     return tramos;
   }
   BC.registrar({
-    id: 'barcino', n: 2, nombre: 'Barcino', tipo: 'Teclado',
-    pista: 'Antes de este nombre tuvo uno en latín. Escríbelo y vuelve su muralla.',
+    id: 'barcino', n: 2, nombre: 'Barcino', tipo: 'Teclat',
+    pista: 'Abans d’aquest nom en va tenir un en llatí. Escriu-lo i tornarà la seva muralla.',
     detectar: function (api) {
       var buf = '';
       api.en('tecla', function (d) {
@@ -30,8 +30,8 @@
       return {
         duracion: 13000 + L,
         tarjeta: { en: 5600, hasta: 12300 + L, titulo: 'Barcino',
-          texto: 'Hacia el año 10 a. C., en tiempos de Augusto, Roma fundó aquí una pequeña colonia amurallada. Su nombre completo era <i>Colonia Iulia Augusta Faventia Paterna Barcino</i>. Entre las calles del Gòtic aún quedan trozos de aquella muralla.',
-          pie: 'Colonia Iulia Augusta Faventia Paterna Barcino · c. 10 a. C.' },
+          texto: 'Cap a l’any 10 aC, en temps d’August, Roma hi va fundar una petita colònia emmurallada. El seu nom complet era <i>Colonia Iulia Augusta Faventia Paterna Barcino</i>. Entre els carrers del Gòtic encara queden trossos d’aquella muralla.',
+          pie: 'Colonia Iulia Augusta Faventia Paterna Barcino · c. 10 aC' },
         inicio: function () { E.encuadrar(centro[0], centro[1], 1.9, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },
         frente: function (ctx, t) {

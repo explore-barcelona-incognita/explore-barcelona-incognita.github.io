@@ -1,16 +1,17 @@
 <!doctype html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Barcelona Incognita</title>
-  <meta name="description" content="Barcelona de cerámica rota: la ciudad real hecha mosaico, con secretos escondidos en sus calles.">
+  <meta name="description" content="Barcelona de ceràmica trencada: la ciutat real feta mosaic, amb secrets amagats als seus carrers.">
   <meta name="author" content="Pau Morató Sebastià">
   <meta name="theme-color" content="#14110f">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232a2420'/%3E%3Cpath d='M4 4h11l-3 10H4zM17 4h11v8l-12 4zM4 17h9l2 11H4zM17 19l11-4v13H18z' fill='%23f2b33d'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Barcelona Incognita">
-  <meta property="og:description" content="La ciutat amagada: Barcelona hecha mosaico de trencadís, con secretos escondidos en sus calles. Acércate, busca… y encuéntralos.">
+  <meta property="og:description" content="La ciutat amagada: Barcelona feta mosaic de trencadís, amb onze secrets amagats als seus carrers. Apropa’t, busca… i troba’ls.">
   <meta property="og:url" content="https://explore-barcelona-incognita.github.io/">
   <meta property="og:image" content="https://explore-barcelona-incognita.github.io/compartir.jpg">
   <meta property="og:image:width" content="1200">
@@ -19,45 +20,45 @@
   <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-  <div class="cargando" id="cargando" aria-live="polite"><span class="cargando-tesela" aria-hidden="true"></span><span>Colocando piezas…</span></div>
-  <canvas id="lienzo" aria-label="Barcelona vista desde arriba como un mapa de mosaico de cerámica, con el mar abajo. Arrastra para moverte y usa la rueda o pellizca para acercarte."></canvas>
+  <div class="cargando" id="cargando" aria-live="polite"><span class="cargando-tesela" aria-hidden="true"></span><span data-i18n="carga">Col·locant peces…</span></div>
+  <canvas id="lienzo" aria-label="Barcelona vista des de dalt com un mapa de mosaic de ceràmica, amb el mar a baix. Arrossega per moure’t i fes servir la roda o pessiga per apropar-te."></canvas>
   <div class="vineta" aria-hidden="true"></div>
 
   <header class="marca">
     <h1 class="titulo">Barcelona <em><span class="pre">in</span>cognita</em></h1>
-    <p class="sub">La ciutat amagada</p>
+    <p class="sub" data-i18n="sub">La ciutat amagada</p>
   </header>
 
   <button class="b-cuaderno" id="b-cuaderno" type="button" aria-expanded="false" aria-controls="cuaderno">
-    <span class="b-fila"><span class="b-etq">Quadern · Secretos</span><span class="b-cont" id="contador">00/11</span></span>
+    <span class="b-fila"><span class="b-etq" data-i18n="bEtq">Quadern · Secrets</span><span class="b-cont" id="contador">00/11</span></span>
     <span class="segmentos" id="segmentos" aria-hidden="true"></span>
   </button>
   <!-- con la vista girada 45° (mar abajo), el norte apunta arriba a la derecha -->
   <svg class="rosa" viewBox="0 0 54 54" aria-hidden="true"><circle cx="27" cy="27" r="25" fill="rgba(20,17,15,.8)" stroke="rgba(243,236,224,.3)"/><g transform="rotate(45 27 27)"><path d="M27 8 L31.5 27 L27 24 L22.5 27 Z" fill="#f2b33d"/><path d="M27 46 L31.5 27 L27 30 L22.5 27 Z" fill="rgba(243,236,224,.35)"/></g><text x="41" y="15" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#f3ece0">N</text></svg>
 
   <div class="hud hud-izq" id="hud" aria-hidden="true">
-    <div><span>Altura</span><b id="h-altura">—</b></div>
-    <div><span>Barri</span><b id="h-barri">—</b></div>
-    <div><span>Batec</span><b class="barras" id="h-batec"><i></i><i></i><i></i><i></i><i></i></b></div>
+    <div><span data-i18n="hAltura">Altura</span><b id="h-altura">—</b></div>
+    <div><span data-i18n="hBarri">Barri</span><b id="h-barri">—</b></div>
+    <div><span data-i18n="hBatec">Batec</span><b class="barras" id="h-batec"><i></i><i></i><i></i><i></i><i></i></b></div>
   </div>
-  <div class="hud hud-der"><span id="ayuda">Arrastra para moverte · Rueda para acercarte</span><small>Mapa: © OpenStreetMap</small></div>
+  <div class="hud hud-der"><span id="ayuda">Arrossega per moure’t · Roda per apropar-te</span><small>Mapa: © OpenStreetMap</small></div>
   <div class="teclas" id="teclas" aria-hidden="true"></div>
 
   <aside class="cuaderno" id="cuaderno" aria-hidden="true" aria-labelledby="cuaderno-titulo">
     <div class="c-cabeza">
       <div>
-        <p class="c-etq">Quadern de camp</p>
-        <h2 id="cuaderno-titulo">Los secretos de la ciudad</h2>
+        <p class="c-etq" data-i18n="cEtq">Quadern de camp</p>
+        <h2 id="cuaderno-titulo" data-i18n="cTitulo">Els secrets de la ciutat</h2>
       </div>
-      <button class="c-cerrar" id="cerrar-cuaderno" type="button" aria-label="Cerrar el cuaderno">✕</button>
+      <button class="c-cerrar" id="cerrar-cuaderno" type="button" aria-label="Tanca el quadern" data-i18n-aria="cCerrar">✕</button>
     </div>
     <p class="c-intro" id="c-intro"></p>
     <ol class="lista" id="lista"></ol>
-    <p class="c-fuentes">Mapa: © OpenStreetMap contributors (ODbL). Tipografías: Instrument Serif e IBM Plex Mono (OFL).</p>
-    <p class="c-credito" id="c-credito-linea" hidden>Un joc de <a id="c-credito" target="_blank" rel="noopener"><b id="c-credito-nombre"></b><span class="flecha"> ↗</span></a></p>
+    <p class="c-fuentes" data-i18n="cFuentes">Mapa: © col·laboradors d’OpenStreetMap (ODbL). Tipografies: Instrument Serif i IBM Plex Mono (OFL).</p>
+    <p class="c-credito" id="c-credito-linea" hidden><span data-i18n="unJuego">Un joc de </span><a id="c-credito" target="_blank" rel="noopener"><b id="c-credito-nombre"></b><span class="flecha"> ↗</span></a></p>
     <div class="c-pie">
-      <button type="button" id="ver-final" class="c-boton" hidden>Torna a veure el final</button>
-      <button type="button" id="borrar" class="c-boton c-boton-tenue">Borrar progreso</button>
+      <button type="button" id="ver-final" class="c-boton" hidden data-i18n="verFinal">Torna a veure el final</button>
+      <button type="button" id="borrar" class="c-boton c-boton-tenue" data-i18n="borrar">Esborra el progrés</button>
     </div>
   </aside>
 
@@ -69,34 +70,37 @@
   </section>
 
   <div class="aviso" id="aviso" role="status"></div>
-  <button class="saltar" id="saltar" type="button">Saltar <kbd>⌫</kbd></button>
+  <button class="saltar" id="saltar" type="button"><span data-i18n="saltar">Salta</span> <kbd>⌫</kbd></button>
 
   <div class="intro" id="intro" hidden>
     <div class="intro-caja">
       <canvas class="intro-medalla" id="intro-medalla" aria-hidden="true"></canvas>
       <h2>Barcelona <em>incognita</em></h2>
-      <p class="intro-sub">La ciutat amagada</p>
-      <p>Esta Barcelona de cerámica rota esconde once secretos en sus calles. Acércate, busca, toca… o quédate quieto. Lo que encuentres quedará anotado en el cuaderno.</p>
-      <button type="button" id="empezar">Entrar en la ciudad</button>
+      <p class="intro-sub" data-i18n="sub">La ciutat amagada</p>
+      <p data-i18n="introTexto">Aquesta Barcelona de ceràmica trencada amaga onze secrets als seus carrers. Apropa’t, busca, toca… o queda’t quiet. El que trobis quedarà anotat al quadern.</p>
+      <button type="button" id="empezar" data-i18n="empezar">Entra a la ciutat</button>
     </div>
   </div>
 
   <div class="creditos" id="creditos" hidden role="dialog" aria-modal="true" aria-labelledby="creditos-nombre">
     <div class="creditos-caja">
-      <p class="creditos-etq">Mosaic col·locat per</p>
+      <p class="creditos-etq" data-i18n="credEtq">Mosaic col·locat per</p>
       <h2 class="creditos-nombre" id="creditos-nombre"></h2>
       <div class="creditos-linea" aria-hidden="true"></div>
-      <p class="creditos-txt">Gràcies per perdre’t per Barcelona fins al final.</p>
+      <p class="creditos-txt" data-i18n="credTxt">Gràcies per perdre’t per Barcelona fins al final.</p>
       <div class="creditos-botones">
-        <a class="creditos-enlace" id="creditos-enlace" target="_blank" rel="noopener">Veure el seu LinkedIn <span aria-hidden="true">↗</span></a>
-        <button type="button" class="creditos-cerrar" id="creditos-cerrar">Continua explorant</button>
+        <a class="creditos-enlace" id="creditos-enlace" target="_blank" rel="noopener"><span data-i18n="credEnlace">Veure el seu LinkedIn</span> <span aria-hidden="true">↗</span></a>
+        <button type="button" class="creditos-cerrar" id="creditos-cerrar" data-i18n="credCerrar">Continua explorant</button>
       </div>
     </div>
   </div>
 
+  <div class="idiomas" role="group" aria-label="Idioma · Language" data-i18n-aria="idioma"><button type="button" data-lang="ca" aria-pressed="true">CA</button><button type="button" data-lang="es" aria-pressed="false">ES</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+
   <script src="datos/barcelona.js"></script>
   <script src="datos/barrios.js"></script>
   <script src="datos/secretos.js"></script>
+  <script src="js/idioma.js"></script>
   <script src="js/motor.js"></script>
   <script src="js/mapa.js"></script>
   <script src="js/rotulos.js"></script>

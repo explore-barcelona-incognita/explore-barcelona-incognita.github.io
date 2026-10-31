@@ -17,8 +17,8 @@
     return [[CH, 0], [m - CH, 0], [m, CH], [m, m - CH], [m - CH, m], [CH, m], [0, m - CH], [0, CH], [CH, 0]].map(function (p) { return M.deCerda(u0 + e + p[0], v0 + e + p[1]); });
   }
   BC.registrar({
-    id: 'cerda', n: 4, nombre: 'Plan Cerdà', tipo: 'Lugar',
-    pista: 'Alguien cortó las esquinas de la ciudad para que se viera mejor.',
+    id: 'cerda', n: 4, nombre: 'Pla Cerdà', tipo: 'Lloc',
+    pista: 'Algú va tallar les cantonades de la ciutat perquè s’hi veiés millor.',
     detectar: function (api) {
       api.en('clic', function (d) {
         if (api.motor.cam.s < 0.79) return;
@@ -43,7 +43,7 @@
       return {
         duracion: 13000 + L,
         tarjeta: { en: 5200, hasta: 12300 + L, titulo: 'Pla Cerdà',
-          texto: 'En 1859 se aprobó el plan del ingeniero Ildefons Cerdà para que Barcelona creciera fuera de sus murallas: una cuadrícula de manzanas de unos 113 metros con las esquinas cortadas a 45°, los chaflanes, para ganar luz, aire y visibilidad en cada cruce.',
+          texto: 'El 1859 es va aprovar el pla de l’enginyer Ildefons Cerdà perquè Barcelona creixés fora muralles: una quadrícula d’illes d’uns 113 metres amb les cantonades tallades a 45°, els xamfrans, per guanyar llum, aire i visibilitat a cada cruïlla.',
           pie: 'Ildefons Cerdà · Pla de l’Eixample · 1859' },
         inicio: function () { E.encuadrar(datos.cruce[0], datos.cruce[1], 0.7, 2400); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2600, 13000 + L, 0.08); },

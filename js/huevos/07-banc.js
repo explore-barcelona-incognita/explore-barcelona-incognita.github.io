@@ -8,8 +8,8 @@
   function parque() { return M.monumento('guell'); }
   function fz(m, s) { return Math.max(1, Math.min(3.6, 0.9 / s)) * (m.esc || 1); }
   BC.registrar({
-    id: 'banc', n: 7, nombre: 'Banc de Park Güell', tipo: 'Gesto',
-    pista: 'En el parque, el banco ondula. Ondula tú también por encima.',
+    id: 'banc', n: 7, nombre: 'Banc del Park Güell', tipo: 'Gest',
+    pista: 'Al parc, el banc fa ones. Fes-ne tu també per sobre.',
     lugar: function () { var m = parque(); return [m.X, m.Y - 40 * fz(m, 0.5)]; }, radio: 260,
     detectar: function (api) {
       var ultimo = 0;
@@ -41,8 +41,8 @@
       function banco(x) { return 60 + 2.4 * Math.sin(x / 4.2); }
       return {
         duracion: 13000 + L,
-        tarjeta: { en: 5200, hasta: 12300 + L, titulo: 'El banco ondulado',
-          texto: 'El banco que rodea la gran plaza de Park Güell se construyó entre 1909 y 1914. Gaudí dibujó sus curvas y Josep Maria Jujol las cubrió de trencadís: trozos de azulejo, de plato y de botella de todos los colores. Se suele decir que mide unos 110 metros.',
+        tarjeta: { en: 5200, hasta: 12300 + L, titulo: 'El banc ondulat',
+          texto: 'El banc que envolta la gran plaça del Park Güell es va construir entre el 1909 i el 1914. Gaudí en va dibuixar les corbes i Josep Maria Jujol el va cobrir de trencadís: trossos de rajola, de plat i d’ampolla de tots els colors. Se sol dir que fa uns 110 metres.',
           pie: 'Antoni Gaudí · Josep Maria Jujol · Park Güell, 1909–1914' },
         inicio: function () { var s = 3.6, f = fz(m, s); E.encuadrar(m.X, m.Y - 48 * f, s, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },

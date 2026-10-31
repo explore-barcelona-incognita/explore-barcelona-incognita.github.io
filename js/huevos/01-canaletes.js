@@ -8,8 +8,8 @@
   var BC = window.BC, U = BC.util, M = BC.mapa;
   function fuente() { return M.monumento('canaletes'); }
   BC.registrar({
-    id: 'canaletes', n: 1, nombre: 'Font de Canaletes', tipo: 'Lugar',
-    pista: 'Quien bebe de ella, dicen, siempre vuelve.',
+    id: 'canaletes', n: 1, nombre: 'Font de Canaletes', tipo: 'Lloc',
+    pista: 'Qui en beu, diuen, sempre hi torna.',
     lugar: function () { var m = fuente(); return [m.X, m.Y - 40]; }, zmin: 0.6, radio: 280,
     detectar: function (api) {
       api.en('clic', function (d) {
@@ -20,7 +20,7 @@
     },
     escena: function (E) {
       var m = fuente(), L = E.lectura, MO = BC.mosaico, FX = BC.fx, cam = {};
-      var confeti = MO.confeti(90, MO.AZULGRANA.concat(['#f4efe3', '#f2b33d']), 11), lema = MO.texto('TORNARÀS', 96, 7.5);
+      var confeti = MO.confeti(90, MO.AZULGRANA.concat(['#f4efe3', '#f2b33d']), 11), lema = MO.texto(BC.idioma.palabra('TORNARÀS'), 96, 7.5);
       // los cuatro caños: de la boca al agua de cada pila (metros del dibujo del monumento)
       var CANOS = [[-16.2, 21, -20, 18.5], [16.2, 21, 20, 18.5], [-3, 24.5, -1.5, 22.5], [3, 24.5, 1.5, 22.5]];
       var FAROLES = [[-14, 93], [14, 93], [-7, 98.5], [7, 98.5]];
@@ -29,8 +29,8 @@
         duracion: 13000 + L,
         tarjeta: {
           en: 5600, hasta: 12300 + L, titulo: 'Font de Canaletes',
-          texto: 'Una fuente de hierro colado de finales del siglo XIX, en lo alto de la Rambla. Dice la tradición que quien bebe de su agua vuelve siempre a Barcelona. Y desde los años treinta, la afición del Barça viene aquí a celebrar sus victorias.',
-          pie: 'Font de Canaletes · La Rambla'
+          texto: 'Una font de ferro colat del 1892, obra de l’arquitecte municipal Pere Falqués, al capdamunt de la Rambla. Diu la tradició que qui beu de la seva aigua sempre torna a Barcelona. I des dels anys trenta, l’afició del Barça hi ve a celebrar les victòries.',
+          pie: 'Font de Canaletes · Pere Falqués · 1892'
         },
         inicio: function () { var c = M.enMonumento(m, 0, 60, 3.4); E.encuadrar(c[0], c[1], 3.4, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.07); },

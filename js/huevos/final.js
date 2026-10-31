@@ -17,13 +17,13 @@
       huevos.sort(function (a, b) { return (est.hallados[a.id] || a.n * 1e12) - (est.hallados[b.id] || b.n * 1e12); });
       var pts = huevos.map(function (h) { return SITIOS[h.id] || [E.cam.x, E.cam.y]; }), tachado = false;
       var cognita = BC.mosaico.texto('COGNITA', 120, 9);
-      function duracion(ms) { var m = Math.round(ms / 60000); return m < 60 ? m + ' min' : m < 1440 ? Math.round(m / 60) + ' h' : Math.round(m / 1440) + ' dies'; }
-      var tiempo = isFinite(datos.desde) && datos.hasta > datos.desde ? ' Has trigat ' + duracion(datos.hasta - datos.desde) + ' des del primer.' : '';
+      function duracion(ms) { var m = Math.round(ms / 60000); var ID = BC.idioma; return m < 60 ? m + ' ' + ID.t('min') : m < 1440 ? Math.round(m / 60) + ' ' + ID.t('horas') : Math.round(m / 1440) + ' ' + ID.t('dias'); }
+      var tiempo = isFinite(datos.desde) && datos.hasta > datos.desde ? BC.idioma.t('finTiempo').replace('%', duracion(datos.hasta - datos.desde)) : '';
       return {
         duracion: 15000 + L,
-        tarjeta: { en: 9000, hasta: 14300 + L, etiqueta: 'Final · Onze d’onze', titulo: 'Barcelona cognita',
-          texto: 'Onze secrets, per l’Onze de Setembre. La ciutat ja no és desconeguda: has begut a Canaletes, has despertat el drac de la Casa Batlló i has fet l’onada al Camp Nou.' + tiempo,
-          pie: 'La ciutat amagada · ja no tant' },
+        tarjeta: { en: 9000, hasta: 14300 + L, etiqueta: BC.idioma.t('finEtq'), titulo: 'Barcelona cognita',
+          texto: BC.idioma.t('finTexto') + tiempo,
+          pie: BC.idioma.t('finPie') },
         inicio: function () { E.camara(750, -1550, E.sMin(), 2600); },
         cuadro: function (t) { if (!tachado && t > 8200) { tachado = true; raiz.classList.add('cognita'); } },
         fin: function () { if (!est.final) raiz.classList.toggle('cognita', false); },

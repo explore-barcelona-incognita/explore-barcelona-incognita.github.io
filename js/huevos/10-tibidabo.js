@@ -23,8 +23,8 @@
     }
   }
   BC.registrar({
-    id: 'tibidabo', n: 10, nombre: 'La noria del Tibidabo', tipo: 'Espera',
-    pista: 'En lo más alto, alguien dijo «todo esto te daré». Míralo en silencio.',
+    id: 'tibidabo', n: 10, nombre: 'La sínia del Tibidabo', tipo: 'Espera',
+    pista: 'Al més amunt, algú va dir «tot això et donaré». Mira-ho en silenci.',
     lugar: function () { return M.enMonumento(monte(), 40, 60, 0.6); }, radio: 260,
     detectar: function (api) {
       function aLaVista(E) { var p = E.aPantalla.apply(null, M.enMonumento(monte(), NX, NY, E.cam.s)); return E.cam.s >= 0.4 && p[0] > 0 && p[0] < E.W && p[1] > 0 && p[1] < E.H; }
@@ -45,7 +45,7 @@
       return {
         duracion: 13500 + L,
         tarjeta: { en: 5600, hasta: 12800 + L, titulo: 'Tibidabo',
-          texto: 'Su nombre viene del latín <i>tibi dabo</i>, «te daré»: las palabras con que, según el Evangelio, el diablo ofreció a Jesús los reinos del mundo desde lo alto de un monte. Arriba, a 512 metros, está el parque de atracciones en funcionamiento más antiguo de España, abierto en 1901.',
+          texto: 'El seu nom ve del llatí <i>tibi dabo</i>, «et donaré»: les paraules amb què, segons l’Evangeli, el diable va oferir a Jesús els regnes del món des de dalt d’una muntanya. A dalt de tot, a 512 metres, hi ha el parc d’atraccions en funcionament més antic d’Espanya, obert el 1901.',
           pie: 'Tibidabo · Serra de Collserola · 512 m' },
         inicio: function () { var c = M.enMonumento(m, 44, 64, 2.6); E.encuadrar(c[0], c[1], 2.6, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13500 + L, 0.05); },

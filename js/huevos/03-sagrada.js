@@ -10,7 +10,7 @@
   function centro(m, s) { return [m.X, m.Y - m.alto * 0.42 * fz(m, s)]; }
   BC.registrar({
     id: 'sagrada', n: 3, nombre: 'Sagrada Família', tipo: 'Mirada',
-    pista: 'Lleva más de un siglo creciendo. Acércate y quédate a mirarla.',
+    pista: 'Fa més d’un segle que creix. Acosta-t’hi i queda’t a mirar-la.',
     lugar: function () { var m = sagrada(); return centro(m, 1.2); }, radio: 300,
     detectar: function (api) {
       var mirando = 0, armado = true;
@@ -28,7 +28,7 @@
       return {
         duracion: 14000 + L,
         tarjeta: { en: 6400, hasta: 13300 + L, titulo: 'Sagrada Família',
-          texto: 'La primera piedra se puso el 19 de marzo de 1882 y Gaudí se hizo cargo de la obra un año después. En febrero de 2026, la cruz de la torre de Jesucristo la llevó a 172,5 metros: la iglesia más alta del mundo. Y aún no está terminada.',
+          texto: 'La primera pedra es va posar el 19 de març de 1882, i Gaudí es va fer càrrec de l’obra un any després. El febrer de 2026, la creu de la torre de Jesucrist la va dur fins als 172,5 metres: l’església més alta del món. I encara no està acabada.',
           pie: 'Temple Expiatori de la Sagrada Família · 1882 –' },
         // la cámara empieza en la base y sube despacio por la fachada, como una grúa
         inicio: function () { var s = 1.25, f = fz(m, s); E.encuadrar(m.X, m.Y - 40 * f, s, 1900); },

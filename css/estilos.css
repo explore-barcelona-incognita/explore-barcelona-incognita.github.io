@@ -326,3 +326,12 @@ button:focus-visible { outline: 1px solid var(--acento); outline-offset: 3px; }
 .panel-prueba button:hover { border-color: var(--linea); color: var(--hueso); background: rgba(243, 236, 224, 0.06); }
 .en-escena .panel-prueba { opacity: 0.35; }
 .en-escena .panel-prueba:hover { opacity: 1; }
+
+/* el selector de idioma (CA · ES · EN): abajo a la derecha, por encima de la entrada y los créditos */
+.idiomas { position: fixed; z-index: 40; right: calc(var(--margen) + 8px); bottom: calc(var(--margen) + 62px); display: inline-flex; border: 1px solid var(--linea); background: rgba(20, 17, 15, 0.82); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: opacity 0.6s; }
+.idiomas button { padding: 7px 10px 6px; font: 500 10.5px/1 var(--mono); letter-spacing: 0.16em; color: var(--hueso-3); border-left: 1px solid var(--linea); }
+.idiomas button:first-child { border-left: 0; }
+.idiomas button:hover { color: var(--hueso); }
+.idiomas button[aria-pressed="true"] { color: var(--fondo); background: var(--acento); }
+.en-escena .idiomas, .cuaderno-abierto .idiomas { opacity: 0; pointer-events: none; }
+@media (max-width: 700px) { .idiomas { bottom: auto; top: calc(var(--margen) + 64px); right: calc(var(--margen) + 4px); } .idiomas button { padding: 6px 8px 5px; } }

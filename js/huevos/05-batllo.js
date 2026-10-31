@@ -7,18 +7,18 @@
   var PALABRA = 'JORDI', ESCAMAS = ['#2f8f7a', '#3aa08a', '#c9693e', '#e8a23a', '#7a3fa0', '#2f5fae', '#5fae7a'];
   function casa() { return M.monumento('batllo'); }
   BC.registrar({
-    id: 'batllo', n: 5, nombre: 'El dragón de la Casa Batlló', tipo: 'Teclado',
-    pista: 'Una casa con escamas en el tejado. Escribe el nombre de quien venció al dragón.',
+    id: 'batllo', n: 5, nombre: 'El drac de la Casa Batlló', tipo: 'Teclat',
+    pista: 'Una casa amb escates a la teulada. Escriu el nom de qui va vèncer el drac.',
     detectar: function (api) {
       var buf = '';
       api.en('tecla', function (d) {
         if (api.motor.escena || d.key.length !== 1) return;
-        buf = (buf + d.key.toUpperCase()).slice(-PALABRA.length);
-        if (buf === PALABRA) { buf = ''; api.disparar(); }
+        buf = (buf + d.key.toUpperCase()).slice(-6);
+        if (/(JORDI|JORGE|GEORGE)$/.test(buf)) { buf = ''; api.disparar(); }   // Sant Jordi, San Jorge o Saint George, según el idioma
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = casa(), MO = BC.mosaico, cam = {}, nombre = MO.texto('SANT JORDI', 96, 7.5);
+      var L = E.lectura, m = casa(), MO = BC.mosaico, cam = {}, nombre = MO.texto(BC.idioma.palabra('SANT JORDI'), 96, 7.5);
       // el lomo: la curva del tejado del dibujo (de −26 a 18 m, y ≈ 82–101)
       function lomo(x) { var t = (x + 26) / 44; return 84 + 17 * Math.sin(t * Math.PI) * (1 - 0.25 * t); }
       function P(lx, ly) { return E.aPantalla.apply(null, M.enMonumento(m, lx, ly, E.cam.s)); }
@@ -30,8 +30,8 @@
       }
       return {
         duracion: 13000 + L,
-        tarjeta: { en: 5400, hasta: 12300 + L, titulo: 'El dragón',
-          texto: 'Gaudí reformó esta casa entre 1904 y 1906. La lectura más popular es la leyenda de Sant Jordi: el tejado sería el lomo del dragón, con escamas de cerámica; la torre con su cruz, la lanza que lo atraviesa; y los balcones y las columnas, los huesos de sus víctimas.',
+        tarjeta: { en: 5400, hasta: 12300 + L, titulo: 'El drac',
+          texto: 'Gaudí va reformar aquesta casa entre el 1904 i el 1906. La lectura més popular és la llegenda de Sant Jordi: la teulada seria l’esquena del drac, amb escates de ceràmica; la torre amb la creu, la llança que el travessa; i els balcons i les columnes, els ossos de les seves víctimes.',
           pie: 'Casa Batlló · Antoni Gaudí · 1904–1906' },
         inicio: function () { var c = M.enMonumento(m, 0, 66, 3.6); E.encuadrar(c[0], c[1], 3.6, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },

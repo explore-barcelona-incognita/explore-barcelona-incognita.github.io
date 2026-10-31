@@ -9,8 +9,8 @@
   function estadio() { return M.monumento('campnou'); }
   function centro(s) { return M.enMonumento(estadio(), 0, 64, s); }
   BC.registrar({
-    id: 'campnou', n: 8, nombre: 'La ola del Camp Nou', tipo: 'Gesto',
-    pista: 'Més que un club. Da una vuelta entera alrededor de su grada.',
+    id: 'campnou', n: 8, nombre: 'L’onada del Camp Nou', tipo: 'Gest',
+    pista: 'Més que un club. Fes una volta sencera al voltant de la grada.',
     lugar: function () { return centro(0.5); }, radio: 260,
     detectar: function (api) {
       var ultimo = 0;
@@ -32,7 +32,7 @@
       return {
         duracion: 13000 + L,
         tarjeta: { en: 5600, hasta: 12300 + L, titulo: 'Camp Nou',
-          texto: 'Se inauguró el 24 de septiembre de 1957, día de la Mercè, y es el estadio más grande de Europa: antes de las obras le cabían 99.354 personas. Reabrió en noviembre de 2025, aún en obras, y el plan es que supere las 105.000.',
+          texto: 'Es va inaugurar el 24 de setembre de 1957, dia de la Mercè, i és l’estadi més gran d’Europa: abans de les obres hi cabien 99.354 persones. Va reobrir el novembre de 2025, encara en obres, i la idea és que en superi les 105.000.',
           pie: 'Camp Nou · Les Corts · 1957' },
         inicio: function () { var c = centro(2.4); E.encuadrar(c[0], c[1], 2.4, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },

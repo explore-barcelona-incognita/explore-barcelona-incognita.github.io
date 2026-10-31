@@ -8,8 +8,8 @@
   var GUERREROS = [-34, -18, -2, 14, 32];   // los mismos del dibujo del monumento
   function casa() { return M.monumento('pedrera'); }
   BC.registrar({
-    id: 'pedrera', n: 6, nombre: 'Los guerreros de La Pedrera', tipo: 'Mirada',
-    pista: 'En su azotea montan guardia. Mírala un rato… y te mirarán.',
+    id: 'pedrera', n: 6, nombre: 'Els guerrers de La Pedrera', tipo: 'Mirada',
+    pista: 'Al terrat hi fan guàrdia. Mira-la una estona… i et miraran.',
     lugar: function () { return M.enMonumento(casa(), 0, 45, 1.2); }, zmin: 0.3, radio: 260,
     detectar: function (api) {
       var mirando = 0, armado = true;
@@ -23,12 +23,12 @@
       });
     },
     escena: function (E) {
-      var L = E.lectura, m = casa(), MO = BC.mosaico, cam = {}, nombre = MO.texto('GUERRERS', 96, 7.5);
+      var L = E.lectura, m = casa(), MO = BC.mosaico, cam = {}, nombre = MO.texto(BC.idioma.palabra('GUERRERS'), 96, 7.5);
       function P(lx, ly) { return E.aPantalla.apply(null, M.enMonumento(m, lx, ly, E.cam.s)); }
       return {
         duracion: 13000 + L,
-        tarjeta: { en: 5400, hasta: 12300 + L, titulo: 'Los guerreros',
-          texto: 'La Casa Milà, que todo el mundo llama La Pedrera, se construyó entre 1906 y 1912. En su azotea, las chimeneas y las salidas de escalera parecen soldados con casco montando guardia; por eso la llaman «el jardín de los guerreros». Desde 1984 es Patrimonio Mundial.',
+        tarjeta: { en: 5400, hasta: 12300 + L, titulo: 'Els guerrers',
+          texto: 'La Casa Milà, que tothom coneix com La Pedrera, es va construir entre el 1906 i el 1912. Al terrat, les xemeneies i les sortides d’escala semblen soldats amb casc fent guàrdia; per això en diuen «el jardí dels guerrers». Des del 1984 és Patrimoni Mundial.',
           pie: 'Casa Milà · Antoni Gaudí · 1906–1912' },
         inicio: function () { var c = M.enMonumento(m, 0, 66, 3.6); E.encuadrar(c[0], c[1], 3.6, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13000 + L, 0.06); },

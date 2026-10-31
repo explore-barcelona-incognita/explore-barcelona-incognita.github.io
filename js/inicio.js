@@ -24,9 +24,9 @@
 
   // en modo prueba: un panel con un botón por secreto (y el final y los créditos) para verlos todos sin buscarlos
   if (I.prueba) {
-    var panel = document.createElement('nav'); panel.className = 'panel-prueba'; panel.setAttribute('aria-label', 'Ver los secretos');
-    panel.innerHTML = '<p>Ver secretos</p>';
-    I.huevos().concat([{ id: 'final', n: '★', nombre: 'Final' }, { id: 'creditos', n: '·', nombre: 'Créditos' }]).forEach(function (h) {
+    var panel = document.createElement('nav'); panel.className = 'panel-prueba'; panel.setAttribute('aria-label', 'Veure els secrets');
+    panel.innerHTML = '<p>Veure secrets</p>';
+    I.huevos().concat([{ id: 'final', n: '★', nombre: 'Final' }, { id: 'creditos', n: '·', nombre: 'Crèdits' }]).forEach(function (h) {
       var b = document.createElement('button'); b.type = 'button';
       b.innerHTML = '<b>' + (typeof h.n === 'number' ? (h.n < 10 ? '0' : '') + h.n : h.n) + '</b> ' + h.nombre;
       b.addEventListener('click', function () { if (E.escena) E.saltar(); setTimeout(function () { BC.debug.disparar(h.id); }, 60); });

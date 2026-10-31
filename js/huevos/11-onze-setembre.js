@@ -7,8 +7,8 @@
   var BC = window.BC, U = BC.util, M = BC.mapa, FX = BC.fx;
   var FOSSAR = M.ll(41.38345, 2.18168), CLAVE = '1714';
   BC.registrar({
-    id: 'onze', n: 11, nombre: 'Onze de Setembre', tipo: 'Teclado',
-    pista: 'Un año que la ciudad no olvida. Cuatro cifras.',
+    id: 'onze', n: 11, nombre: 'Onze de Setembre', tipo: 'Teclat',
+    pista: 'Un any que la ciutat no oblida. Quatre xifres.',
     detectar: function (api) {
       var buf = '';
       api.en('tecla', function (d) {
@@ -25,7 +25,7 @@
       return {
         duracion: 14500 + L,
         tarjeta: { en: 5600, hasta: 13800 + L, titulo: 'Onze de Setembre',
-          texto: 'En el Fossar de les Moreres, junto a Santa Maria del Mar, se enterró a los defensores que murieron en el asedio de 1713–1714. Barcelona cayó el 11 de septiembre de 1714, y ese día es hoy la Diada Nacional de Catalunya. Aquí arde una llama que no se apaga, bajo un verso de Pitarra: <i>«Al fossar de les moreres no s’hi enterra cap traïdor».</i>',
+          texto: 'Al Fossar de les Moreres, al costat de Santa Maria del Mar, hi van enterrar els defensors que van morir en el setge de 1713–1714. Barcelona va caure l’11 de setembre de 1714, i aquell dia és avui la Diada Nacional de Catalunya. Aquí crema una flama que no s’apaga, sota un vers de Pitarra: <i>«Al fossar de les moreres no s’hi enterra cap traïdor».</i>',
           pie: 'Fossar de les Moreres · 11.09.1714' },
         inicio: function () { E.encuadrar(FOSSAR[0], FOSSAR[1], 3.6, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 14500 + L, 0.05); },

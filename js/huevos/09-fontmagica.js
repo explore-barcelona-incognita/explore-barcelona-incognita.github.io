@@ -7,8 +7,8 @@
   var COLORES = ['#5fb6e4', '#e05aa8', '#f2b33d', '#6fd08a', '#9a7ae0', '#f4fbfd'];
   function palau() { return M.monumento('mnac'); }
   BC.registrar({
-    id: 'fontmagica', n: 9, nombre: 'Font Màgica', tipo: 'Lugar',
-    pista: 'Al pie de Montjuïc, el agua sabe bailar. Tócala.',
+    id: 'fontmagica', n: 9, nombre: 'Font Màgica', tipo: 'Lloc',
+    pista: 'Al peu de Montjuïc, l’aigua sap ballar. Toca-la.',
     lugar: function () { return M.enMonumento(palau(), 0, -24, 0.8); }, radio: 240,
     detectar: function (api) {
       api.en('clic', function (d) {
@@ -23,7 +23,7 @@
       return {
         duracion: 13500 + L,
         tarjeta: { en: 5600, hasta: 12800 + L, titulo: 'Font Màgica',
-          texto: 'La diseñó el ingeniero Carles Buïgas para la Exposición Internacional de 1929, al pie del Palau Nacional, que hoy es el MNAC. La Guerra Civil la dejó muy dañada y volvió a funcionar a mediados de los cincuenta. Hoy sus chorros de agua y de luz bailan al ritmo de la música.',
+          texto: 'La va dissenyar l’enginyer Carles Buïgas per a l’Exposició Internacional de 1929, al peu del Palau Nacional, que avui és el MNAC. La Guerra Civil la va deixar molt malmesa i va tornar a funcionar a mitjan anys cinquanta. Avui els seus raigs d’aigua i de llum ballen al ritme de la música.',
           pie: 'Font Màgica de Montjuïc · Carles Buïgas · 1929' },
         inicio: function () { var c = M.enMonumento(m, 0, 10, 3.0); E.encuadrar(c[0], c[1], 3.0, 2600); },
         cuadro: function (t) { MO.respirar(E, cam, t, 2700, 13500 + L, 0.05); },
